@@ -1,0 +1,172 @@
+'use client'
+import { useState, useEffect, useCallback } from 'react'
+import { useParams } from 'next/navigation'
+import { formatNumber } from '@/lib/utils'
+
+interface AnalyticsData {
+  totals: { shown: number; accepted_all: number; rejected_all: number; customised: number }
+  decisions: number
+  acceptanceRate: number
+  consentRate: number
+  languages: { code: string; name: string; count: number }[]
+  devices: { type: string; count: number }[]
+  purposes: { purpose: string; accepted: number; total: number; rate: number }[]
+  daily: { date: string; shown: number; accepted: number; rejected: number; customised: number }[]
+  totalEvents: number
+}
+
+const DEVICE_ICON: Record<string, string> = { mobile: '📱', desktop: '💻', tablet: '📲' }
+
+export default function PortalAnalytics() {
+  const { clientKey } = useParams<{ clientKey: string }>()
+  const [clientId, setClientId] = useState('')
+  const [days, setDays] = useState(30)
+  const [data, setData] = useState<AnalyticsData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`/api/portal?key=${clientKey}`).then(r => r.json()).then(d => { if (d.client) setClientId(d.client.id) })
+  }, [clientKey])
+
+  const load = useCallback(async () => {
+    if (!clientId) return
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/analytics?clientId=${clientId}&days=${days}`)
+      setData(await res.json())
+    } catch { /* */ }
+    setLoading(false)
+  }, [clientId, days])
+
+  useEffect(() => { load() }, [load])
+
+  const maxDaily = data ? Math.max(1, ...data.daily.map(d => d.shown)) : 1
+
+  return (
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-[#1b1b29] tracking-tight">Analytics</h1>
+          <p className="text-sm text-zinc-500 mt-1">How your customers respond to consent</p>
+        </div>
+        <div className="flex bg-[#ffffff] border border-[#e8e8ee] rounded-xl p-1">
+          {[7, 30, 90].map(d => (
+            <button key={d} onClick={() => setDays(d)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${days === d ? 'bg-violet-600 text-white' : 'text-zinc-500 hover:text-[#1b1b29]'}`}>{d}d</button>
+          ))}
+        </div>
+      </div>
+
+      {loading || !clientId ? (
+        <div className="flex items-center justify-center py-32"><div className="w-10 h-10 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin"></div></div>
+      ) : !data || data.totalEvents === 0 ? (
+        <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-16 text-center">
+          <div className="text-5xl mb-4">📊</div>
+          <h3 className="text-base font-semibold text-[#1b1b29] mb-2">No data yet</h3>
+          <p className="text-sm text-zinc-500 max-w-sm mx-auto">Analytics appear once visitors start interacting with your consent widget.</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            {[
+              { label: 'Consent Prompts', value: formatNumber(data.totals.shown), icon: '👁️' },
+              { label: 'Consent Rate', value: `${data.consentRate}%`, icon: '🤝' },
+              { label: 'Acceptance Rate', value: `${data.acceptanceRate}%`, icon: '✅' },
+              { label: 'Rejections', value: formatNumber(data.totals.rejected_all), icon: '🛑' },
+            ].map(s => (
+              <div key={s.label} className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-5">
+                <div className="text-2xl mb-3">{s.icon}</div>
+                <div className="text-2xl font-bold text-[#1b1b29] mb-1">{s.value}</div>
+                <div className="text-xs text-zinc-500">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Daily trend */}
+          <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6 mb-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">Daily Activity</h2>
+              <div className="flex gap-4 text-xs">
+                <span className="flex items-center gap-1.5 text-zinc-500"><span className="w-2.5 h-2.5 rounded-sm bg-green-500"></span>Accepted</span>
+                <span className="flex items-center gap-1.5 text-zinc-500"><span className="w-2.5 h-2.5 rounded-sm bg-red-500"></span>Rejected</span>
+                <span className="flex items-center gap-1.5 text-zinc-500"><span className="w-2.5 h-2.5 rounded-sm bg-violet-500"></span>Customised</span>
+              </div>
+            </div>
+            <div className="flex items-end gap-1 h-40">
+              {data.daily.map((d, i) => {
+                const total = d.shown || 0
+                const h = (total / maxDaily) * 100
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center justify-end group relative h-full">
+                    <div className="w-full flex flex-col justify-end rounded-t overflow-hidden" style={{ height: `${Math.max(h, 2)}%` }}>
+                      {d.shown > 0 ? (
+                        <>
+                          <div className="bg-green-500" style={{ height: `${(d.accepted / total) * 100}%` }}></div>
+                          <div className="bg-red-500" style={{ height: `${(d.rejected / total) * 100}%` }}></div>
+                          <div className="bg-violet-500" style={{ height: `${(d.customised / total) * 100}%` }}></div>
+                          <div className="bg-zinc-300 flex-1"></div>
+                        </>
+                      ) : <div className="bg-zinc-200 h-full"></div>}
+                    </div>
+                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-[10px] text-white whitespace-nowrap z-10">
+                      <div className="font-semibold mb-0.5">{d.date.slice(5)}</div>
+                      <div className="text-zinc-500">Shown: {d.shown}</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-6">
+            <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
+              <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-4">🌐 Languages</h2>
+              <div className="space-y-3">
+                {data.languages.slice(0, 6).map(l => {
+                  const max = data.languages[0]?.count || 1
+                  return (
+                    <div key={l.code}>
+                      <div className="flex justify-between text-xs mb-1"><span className="text-zinc-700">{l.name}</span><span className="text-zinc-500">{l.count}</span></div>
+                      <div className="h-1.5 bg-[#e8e8ee] rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-violet-500 to-violet-400 rounded-full" style={{ width: `${(l.count / max) * 100}%` }}></div></div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
+              <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-4">📱 Devices</h2>
+              <div className="space-y-4">
+                {data.devices.map(d => {
+                  const totalDev = data.devices.reduce((s, x) => s + x.count, 0)
+                  const pct = Math.round((d.count / totalDev) * 100)
+                  return (
+                    <div key={d.type} className="flex items-center gap-3">
+                      <span className="text-xl">{DEVICE_ICON[d.type] || '🖥️'}</span>
+                      <div className="flex-1">
+                        <div className="flex justify-between text-xs mb-1"><span className="text-zinc-700 capitalize">{d.type}</span><span className="text-zinc-500">{pct}%</span></div>
+                        <div className="h-1.5 bg-[#e8e8ee] rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style={{ width: `${pct}%` }}></div></div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
+              <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-4">🎯 Purpose Opt-in</h2>
+              <div className="space-y-3">
+                {data.purposes.map(p => (
+                  <div key={p.purpose}>
+                    <div className="flex justify-between text-xs mb-1"><span className="text-zinc-700 capitalize">{p.purpose.replace(/_/g, ' ')}</span><span className="text-zinc-500">{p.rate}%</span></div>
+                    <div className="h-1.5 bg-[#e8e8ee] rounded-full overflow-hidden"><div className={`h-full rounded-full ${p.rate >= 70 ? 'bg-green-500' : p.rate >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${p.rate}%` }}></div></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}

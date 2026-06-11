@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Enforcement Test</title></head>
+<body style="font-family:sans-serif;padding:40px;background:#f6f6fb">
+  <h1>DPDP Enforcement Test Store</h1>
+  <p>A parked analytics tag is gated behind consent.</p>
+  <!-- Brand's analytics tag, parked until consent (the enforcement contract) -->
+  <script type="text/plain" data-dpdp-purpose="analytics">
+    window.__analyticsRan = true;
+  </script>
+  <!-- The DPDP consent widget -->
+  <script src="http://localhost:3002/w.js?id=b1e1f3bd73b21e5cbc7d09d1321c8a0b"></script>
+</body></html>

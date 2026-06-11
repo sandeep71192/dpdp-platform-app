@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Mamaearth — Widget Test</title></head>
+<body style="font-family:sans-serif;padding:60px;background:#faf8f5">
+  <h1 style="color:#F04438">Mamaearth Test Store</h1>
+  <p style="color:#666">The DPDP consent widget should appear bottom-right. Accept/reject and watch events log to your dashboard.</p>
+  <script src="http://localhost:3002/w.js?id=b1e1f3bd73b21e5cbc7d09d1321c8a0b"></script>
+  <script>document.addEventListener('dpdp:consent',e=>console.log('Consent:',e.detail));</script>
+</body>
+</html>
