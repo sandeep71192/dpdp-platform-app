@@ -41,7 +41,10 @@ export function generateWidgetJs(d: WidgetData): string {
   var T=${JSON.stringify(d.translations)};
   var LANGS=${JSON.stringify(LANGUAGES)};
   var lang='en',expanded=null,toggles={},hadConsent=false,sessionId=Math.random().toString(36).slice(2)+Date.now().toString(36);
-  G.forEach(function(g){toggles[g.id]=true;});
+  // DPDP s.6(1): consent needs a clear affirmative action — nothing non-essential
+  // may be pre-ticked. Only genuinely necessary purposes start ON; the rest are OFF
+  // until the user switches them on (or taps "Accept All").
+  G.forEach(function(g){toggles[g.id]=!!g.necessary;});
 
   // ---- Consent enforcement (DPDP s.4/s.6): block non-essential processing until opt-in ----
   // Map our purpose groups to Google Consent Mode v2 signals.

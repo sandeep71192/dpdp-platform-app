@@ -69,29 +69,29 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
     purposeGroups: [
       {
         id: "essential",
-        label: "Essential",
-        description: "Required to process orders, manage payments, and handle returns. Cannot be disabled.",
+        label: "Needed to run your order",
+        description: "The basics we can't skip — taking your order, processing payment, shipping it, and sorting out returns. This stays on because your order simply can't happen without it.",
         necessary: true,
         dataPoints: ["Name & contact details", "Shipping address", "Payment confirmation", "Order ID & history"],
       },
       {
         id: "functional",
-        label: "Functional",
-        description: "Saves your size preferences, wishlist, and recently viewed items for a smoother experience.",
+        label: "Remember my preferences",
+        description: "Lets the site remember your size, wishlist, and recently viewed items so you don't start from scratch each visit. Off until you turn it on.",
         necessary: false,
         dataPoints: ["Size & fit preferences", "Saved addresses", "Wishlist & saved items", "Recently viewed products"],
       },
       {
         id: "analytics",
-        label: "Analytics",
-        description: "Helps us understand how you browse so we can improve the experience.",
+        label: "Help improve the site",
+        description: "Shows us, in aggregate, how people use the site so we can fix what's confusing and make it faster. Off until you turn it on.",
         necessary: false,
         dataPoints: ["Pages visited & time spent", "Product clicks & scroll depth", "Search queries", "Device & browser type"],
       },
       {
         id: "marketing",
-        label: "Marketing",
-        description: "Used to send you personalized offers, style recommendations, and targeted ads.",
+        label: "Personalised offers & ads",
+        description: "Lets us send you offers and style picks we think you'll like, and show you our ads on other sites. Off until you turn it on — your shopping works fine without it.",
         necessary: false,
         dataPoints: ["Purchase history", "Brand & style preferences", "Email open & click behaviour", "Ad interaction data"],
       },
@@ -179,29 +179,29 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
     purposeGroups: [
       {
         id: "essential",
-        label: "Essential",
-        description: "Required to place orders, process payments, and manage returns. Cannot be disabled.",
+        label: "Needed to run your order",
+        description: "The basics we can't skip — placing your order, taking payment, and handling returns. This stays on because your order can't be completed without it.",
         necessary: true,
         dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history"],
       },
       {
         id: "skin_profile",
-        label: "Skin Profile (Sensitive)",
-        description: "Your skin type, concerns, and allergy data. Classified as sensitive under DPDP Act 2023 — used only for product safety and recommendations.",
+        label: "My skin details",
+        description: "Things like your skin type, concerns, and any allergies. This is personal, so we keep it private, use it only to suggest products that suit you and keep you safe, and never sell it. Off until you choose to share it.",
         necessary: false,
         dataPoints: ["Skin type (oily, dry, combination)", "Skin concerns (acne, pigmentation, etc.)", "Known allergies & sensitivities", "Skin tone & undertone"],
       },
       {
         id: "analytics",
-        label: "Analytics",
-        description: "Understands how you interact with the site to improve product discovery.",
+        label: "Help improve the site",
+        description: "Shows us, in aggregate, how people use the site so we can make products easier to find. Off until you turn it on.",
         necessary: false,
         dataPoints: ["Products browsed & time spent", "Search terms used", "Routine builder interactions", "Device & location (city-level)"],
       },
       {
         id: "marketing",
-        label: "Marketing",
-        description: "Personalised offers, restock alerts, and skincare tips based on your profile.",
+        label: "Personalised offers & tips",
+        description: "Lets us send you offers, restock alerts, and skincare tips matched to you. Off until you turn it on — your shopping works fine without it.",
         necessary: false,
         dataPoints: ["Purchase history", "Skin profile for targeting", "Email/SMS engagement data", "Repurchase cycle tracking"],
       },
@@ -287,29 +287,29 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
     purposeGroups: [
       {
         id: "essential",
-        label: "Essential",
-        description: "Required to accept and deliver your order. Cannot be disabled.",
+        label: "Needed to run your order",
+        description: "The basics we can't skip — taking your order, payment, and your live location while it's being delivered. This stays on because we can't get your food to you without it.",
         necessary: true,
         dataPoints: ["Name, phone & email", "Delivery address", "Order details & payment confirmation", "Real-time location during delivery"],
       },
       {
         id: "dietary",
-        label: "Dietary Profile (Sensitive)",
-        description: "Allergen and dietary restriction data. Treated as sensitive under DPDP Act 2023 — used only for food safety.",
+        label: "My food restrictions",
+        description: "Allergies and dietary choices (like veg, vegan, or Jain). This is personal, so we keep it private and use it only to keep your food safe. Off until you choose to share it.",
         necessary: false,
         dataPoints: ["Allergens (nuts, dairy, gluten, etc.)", "Dietary preferences (veg, vegan, Jain, etc.)", "Religious dietary restrictions", "Health-based restrictions (diabetic, low-sodium, etc.)"],
       },
       {
         id: "analytics",
-        label: "Analytics",
-        description: "Tracks ordering patterns to improve delivery speed and menu relevance.",
+        label: "Help improve the service",
+        description: "Shows us, in aggregate, how people order so we can speed up delivery and show more relevant menus. Off until you turn it on.",
         necessary: false,
         dataPoints: ["Order frequency & timing", "Cuisine & item preferences", "Search & filter behaviour", "Delivery location history"],
       },
       {
         id: "marketing",
-        label: "Marketing",
-        description: "Sends you personalised deals, restaurant recommendations, and reorder reminders.",
+        label: "Personalised deals",
+        description: "Lets us send you deals, restaurant picks, and reorder nudges matched to you. Off until you turn it on — ordering works fine without it.",
         necessary: false,
         dataPoints: ["Order history for targeting", "Push notification engagement", "Promotional offer responses", "Referral programme participation"],
       },
@@ -346,10 +346,10 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
       "Promotional communications about deals and new products",
     ],
     purposeGroups: [
-      { id: "essential", label: "Essential", description: "Required to process orders, manage warranties, and handle returns.", necessary: true, dataPoints: ["Name, email & phone", "Shipping address", "Order ID & invoice", "Payment confirmation"] },
-      { id: "warranty", label: "Warranty & Service", description: "Device identifiers needed to register warranty and coordinate authorised service.", necessary: false, dataPoints: ["Serial number / IMEI", "Purchase date & invoice", "Authorised service centre routing", "Repair history"] },
-      { id: "analytics", label: "Analytics", description: "Tracks how you discover and compare products to improve the shopping experience.", necessary: false, dataPoints: ["Products compared & viewed", "Spec filter usage", "Search terms", "Time spent on product pages"] },
-      { id: "marketing", label: "Marketing", description: "Sends price drop alerts, deal notifications, and upgrade recommendations.", necessary: false, dataPoints: ["Purchase & search history", "Price alert preferences", "Email & notification engagement", "Ad click data"] },
+      { id: "essential", label: "Needed to run your order", description: "The basics we can't skip — taking your order, payment, warranty records, and returns. This stays on because your order can't be completed without it.", necessary: true, dataPoints: ["Name, email & phone", "Shipping address", "Order ID & invoice", "Payment confirmation"] },
+      { id: "warranty", label: "Warranty & service", description: "Your device's serial number and purchase details so we can register the warranty and set up authorised repairs if you ever need them. Off until you turn it on.", necessary: false, dataPoints: ["Serial number / IMEI", "Purchase date & invoice", "Authorised service centre routing", "Repair history"] },
+      { id: "analytics", label: "Help improve the site", description: "Shows us, in aggregate, how people browse and compare products so we can make shopping easier. Off until you turn it on.", necessary: false, dataPoints: ["Products compared & viewed", "Spec filter usage", "Search terms", "Time spent on product pages"] },
+      { id: "marketing", label: "Deals & upgrade alerts", description: "Lets us send you price-drop alerts, deals, and upgrade picks matched to you. Off until you turn it on — your shopping works fine without it.", necessary: false, dataPoints: ["Purchase & search history", "Price alert preferences", "Email & notification engagement", "Ad click data"] },
     ],
     journeyStages: [
       { stage: "Browsing & Comparison", icon: "🔍", dataCollected: [{ field: "Products viewed & compared", why: "Improve comparison tools", necessary: false }, { field: "Spec filter selections", why: "Better search results", necessary: false }, { field: "Device & browser info", why: "Site rendering & security", necessary: true }] },
@@ -379,11 +379,14 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
       "Sending order updates to parent/guardian",
       "Parental consent is mandatory for any data relating to minors",
     ],
+    // NOTE: No analytics/behavioural or marketing/targeted-ad toggles here.
+    // DPDP s.9(3) prohibits tracking, behavioural monitoring, and targeted
+    // advertising directed at children — this is banned outright, not something
+    // a parent can switch on. Only order-essential and non-tracking convenience
+    // purposes are offered.
     purposeGroups: [
-      { id: "essential", label: "Essential", description: "Required to process orders and ensure product age-appropriateness. Parent/guardian consent mandatory.", necessary: true, dataPoints: ["Parent/guardian name & contact", "Delivery address", "Payment confirmation", "Child's age range (for safety filtering)"] },
-      { id: "functional", label: "Functional", description: "Saves gift lists and age-based preferences for a better shopping experience.", necessary: false, dataPoints: ["Wishlist & gift registry", "Age group preferences", "Previously purchased items"] },
-      { id: "analytics", label: "Analytics", description: "Anonymised data to understand popular toy categories and improve product curation.", necessary: false, dataPoints: ["Category browsing patterns (anonymised)", "Search terms", "Device type"] },
-      { id: "marketing", label: "Marketing", description: "New arrivals, seasonal sales, and age-appropriate product alerts — with parent consent only.", necessary: false, dataPoints: ["Purchase history", "Age-group preferences", "Email engagement data"] },
+      { id: "essential", label: "Needed to run your order", description: "The basics we need to take your order, get paid, ship it, and handle returns. A parent or guardian has to give the OK first. This stays on so your order can be completed.", necessary: true, dataPoints: ["Parent / guardian name & contact", "Where to deliver", "Payment confirmation", "Child's age range (only to show age-safe products)"] },
+      { id: "functional", label: "Handy extras", description: "Little conveniences like saving a wishlist or gift list and remembering age-group preferences. We don't track the child or build a profile — this is just to make shopping easier. Off by default; turn it on if you'd like.", necessary: false, dataPoints: ["Wishlist & gift registry", "Age-group preferences", "Things you bought before"] },
     ],
     journeyStages: [
       { stage: "Browsing", icon: "👀", dataCollected: [{ field: "Device & browser info", why: "Site rendering", necessary: true }, { field: "Age range filter used", why: "Show age-appropriate products", necessary: false }, { field: "Category & product views", why: "Improve curation", necessary: false }] },
@@ -416,10 +419,10 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
       "This data is sensitive and will NOT be shared with third parties",
     ],
     purposeGroups: [
-      { id: "essential", label: "Essential", description: "Required to process and deliver orders. Cannot be disabled.", necessary: true, dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history"] },
-      { id: "health_profile", label: "Health Profile (Sensitive)", description: "Health goals, conditions, and fitness data. Special category under DPDP Act 2023 — never shared with third parties.", necessary: false, dataPoints: ["Health goals (weight loss, muscle gain, etc.)", "Medical conditions (if disclosed)", "Current medications (if disclosed)", "Fitness level & activity data"] },
-      { id: "analytics", label: "Analytics", description: "Anonymised usage data to improve product recommendations and content.", necessary: false, dataPoints: ["Product pages visited", "Content engagement", "Search terms", "Device type"] },
-      { id: "marketing", label: "Marketing", description: "Personalised health tips, supplement reminders, and product offers.", necessary: false, dataPoints: ["Purchase history", "Health goals for targeting", "Email & notification engagement", "Subscription cycle data"] },
+      { id: "essential", label: "Needed to run your order", description: "The basics we can't skip — taking your order, payment, and delivery. This stays on because your order can't be completed without it.", necessary: true, dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history"] },
+      { id: "health_profile", label: "My health details", description: "Things like your health goals, any conditions, and fitness data. This is sensitive, so we keep it private, use it only to tailor recommendations for you, and never share or sell it. Off until you choose to share it.", necessary: false, dataPoints: ["Health goals (weight loss, muscle gain, etc.)", "Medical conditions (if disclosed)", "Current medications (if disclosed)", "Fitness level & activity data"] },
+      { id: "analytics", label: "Help improve the site", description: "Shows us, in aggregate, how people use the site so we can improve recommendations and content. Off until you turn it on.", necessary: false, dataPoints: ["Product pages visited", "Content engagement", "Search terms", "Device type"] },
+      { id: "marketing", label: "Personalised tips & offers", description: "Lets us send you health tips, refill reminders, and offers matched to you. Off until you turn it on — your shopping works fine without it.", necessary: false, dataPoints: ["Purchase history", "Health goals for targeting", "Email & notification engagement", "Subscription cycle data"] },
     ],
     journeyStages: [
       { stage: "Browsing & Discovery", icon: "🔍", dataCollected: [{ field: "Device & browser info", why: "Security & rendering", necessary: true }, { field: "Category & product views", why: "Improve product discovery", necessary: false }, { field: "Blog & content engagement", why: "Relevant health content", necessary: false }] },
@@ -452,10 +455,10 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
       "Fraud detection and prevention",
     ],
     purposeGroups: [
-      { id: "essential", label: "Essential (Regulatory)", description: "Mandated by RBI, SEBI, and IRDAI. Required for KYC, AML compliance, and fraud prevention. Cannot be disabled.", necessary: true, dataPoints: ["Name, DOB & address (KYC)", "PAN number", "Aadhaar (last 4 digits)", "Bank account / IFSC for disbursals"] },
-      { id: "credit", label: "Credit Assessment", description: "Used to evaluate your eligibility for financial products. Shared with credit bureaus as per RBI mandate.", necessary: false, dataPoints: ["Income & employment details", "Credit score (CIBIL/Experian pull)", "Existing loan & EMI obligations", "Bank statement analysis"] },
-      { id: "analytics", label: "Analytics", description: "Anonymised data to improve product offerings and application flows.", necessary: false, dataPoints: ["Application journey drop-offs", "Feature usage patterns", "Device & session data"] },
-      { id: "marketing", label: "Marketing", description: "Personalised product offers based on your financial profile — with explicit consent only.", necessary: false, dataPoints: ["Financial product preferences", "Eligibility-based targeting", "Email & notification engagement"] },
+      { id: "essential", label: "Required by law (KYC)", description: "Identity and account details the law requires us to collect and keep to verify who you are, prevent fraud, and meet RBI/SEBI rules. This stays on because we're legally required to do it.", necessary: true, dataPoints: ["Name, DOB & address (KYC)", "PAN number", "Aadhaar (last 4 digits)", "Bank account / IFSC for disbursals"] },
+      { id: "credit", label: "Check what I qualify for", description: "Lets us look at your income and credit record to see which products you're eligible for. This means a credit-bureau check, as the rules require. Off until you choose to share it.", necessary: false, dataPoints: ["Income & employment details", "Credit score (CIBIL/Experian pull)", "Existing loan & EMI obligations", "Bank statement analysis"] },
+      { id: "analytics", label: "Help improve the service", description: "Shows us, in aggregate, where people get stuck so we can make the application smoother. Off until you turn it on.", necessary: false, dataPoints: ["Application journey drop-offs", "Feature usage patterns", "Device & session data"] },
+      { id: "marketing", label: "Personalised offers", description: "Lets us suggest products that may suit your financial profile. Off until you turn it on — nothing about your application depends on it.", necessary: false, dataPoints: ["Financial product preferences", "Eligibility-based targeting", "Email & notification engagement"] },
     ],
     journeyStages: [
       { stage: "Discovery", icon: "🔍", dataCollected: [{ field: "Device & browser info", why: "Security & fraud detection", necessary: true }, { field: "Product interest signals", why: "Eligibility pre-screening", necessary: false }] },
@@ -489,10 +492,10 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
       "Marketing communications and promotional offers",
     ],
     purposeGroups: [
-      { id: "essential", label: "Essential", description: "Required for order processing, payments, and account management. Cannot be disabled.", necessary: true, dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history & invoices"] },
-      { id: "functional", label: "Functional", description: "Remembers your preferences, saved addresses, and wishlist for a smoother experience.", necessary: false, dataPoints: ["Saved addresses", "Wishlist & saved carts", "Language & currency preferences", "Recently viewed items"] },
-      { id: "analytics", label: "Analytics", description: "Anonymised data to understand shopping patterns and improve the platform.", necessary: false, dataPoints: ["Pages visited & time spent", "Search queries", "Category & product interactions", "Device type & location (city)"] },
-      { id: "marketing", label: "Marketing", description: "Personalised product recommendations, offers, and retargeting ads.", necessary: false, dataPoints: ["Purchase & browsing history", "Price alert preferences", "Email & notification engagement", "Ad interaction data"] },
+      { id: "essential", label: "Needed to run your order", description: "The basics we can't skip — your account, taking your order, payment, and delivery. This stays on because your order can't be completed without it.", necessary: true, dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history & invoices"] },
+      { id: "functional", label: "Remember my preferences", description: "Lets the site remember your saved addresses, wishlist, and language so you don't redo them each visit. Off until you turn it on.", necessary: false, dataPoints: ["Saved addresses", "Wishlist & saved carts", "Language & currency preferences", "Recently viewed items"] },
+      { id: "analytics", label: "Help improve the site", description: "Shows us, in aggregate, how people shop so we can fix what's confusing and improve the site. Off until you turn it on.", necessary: false, dataPoints: ["Pages visited & time spent", "Search queries", "Category & product interactions", "Device type & location (city)"] },
+      { id: "marketing", label: "Personalised offers & ads", description: "Lets us send you recommendations and offers, and show you our ads on other sites. Off until you turn it on — your shopping works fine without it.", necessary: false, dataPoints: ["Purchase & browsing history", "Price alert preferences", "Email & notification engagement", "Ad interaction data"] },
     ],
     journeyStages: [
       { stage: "Browsing", icon: "👀", dataCollected: [{ field: "Device & browser info", why: "Site rendering & security", necessary: true }, { field: "Products viewed & time spent", why: "Improve recommendations", necessary: false }, { field: "Search queries", why: "Better search results", necessary: false }] },
@@ -524,10 +527,10 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
       "Compliance with immigration and travel regulations",
     ],
     purposeGroups: [
-      { id: "essential", label: "Essential", description: "Required to confirm bookings and comply with travel regulations. Cannot be disabled.", necessary: true, dataPoints: ["Name & passport / ID details", "Travel dates & destinations", "Contact for travel alerts", "Payment confirmation"] },
-      { id: "traveller_profile", label: "Traveller Preferences", description: "Seat preferences, meal choices, and loyalty programme data for a better travel experience.", necessary: false, dataPoints: ["Seat & cabin preferences", "Meal type preferences", "Accessibility requirements", "Frequent flyer / loyalty numbers"] },
-      { id: "analytics", label: "Analytics", description: "Anonymised booking patterns to improve search and pricing tools.", necessary: false, dataPoints: ["Search & filter behaviour", "Booking funnel drop-offs", "Device & session data"] },
-      { id: "marketing", label: "Marketing", description: "Personalised travel deals, price alerts, and destination recommendations.", necessary: false, dataPoints: ["Travel history for targeting", "Price alert preferences", "Email & notification engagement"] },
+      { id: "essential", label: "Needed to run your booking", description: "The basics we can't skip — confirming your booking, the traveller and ID details that airlines and immigration require, and payment. This stays on because your trip can't be booked without it.", necessary: true, dataPoints: ["Name & passport / ID details", "Travel dates & destinations", "Contact for travel alerts", "Payment confirmation"] },
+      { id: "traveller_profile", label: "My travel preferences", description: "Things like seat, meal, accessibility needs, and loyalty numbers, so your trips are set up the way you like. Off until you turn it on.", necessary: false, dataPoints: ["Seat & cabin preferences", "Meal type preferences", "Accessibility requirements", "Frequent flyer / loyalty numbers"] },
+      { id: "analytics", label: "Help improve the site", description: "Shows us, in aggregate, how people search and book so we can improve search and pricing. Off until you turn it on.", necessary: false, dataPoints: ["Search & filter behaviour", "Booking funnel drop-offs", "Device & session data"] },
+      { id: "marketing", label: "Travel deals & alerts", description: "Lets us send you fare drops, deals, and destination picks matched to you. Off until you turn it on — booking works fine without it.", necessary: false, dataPoints: ["Travel history for targeting", "Price alert preferences", "Email & notification engagement"] },
     ],
     journeyStages: [
       { stage: "Search & Discovery", icon: "✈️", dataCollected: [{ field: "Origin, destination & dates", why: "Search relevant flights/hotels", necessary: true }, { field: "Traveller count & type", why: "Display accurate pricing", necessary: true }, { field: "Search history", why: "Personalise future searches", necessary: false }] },
@@ -559,10 +562,10 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
       "Promotional offers and new collection updates",
     ],
     purposeGroups: [
-      { id: "essential", label: "Essential", description: "Required to process orders, schedule delivery, and manage installations. Cannot be disabled.", necessary: true, dataPoints: ["Name, email & phone", "Precise delivery address", "Payment confirmation", "Order & warranty records"] },
-      { id: "home_profile", label: "Home Profile", description: "Room dimensions and style preferences to help you visualise products in your space.", necessary: false, dataPoints: ["Room dimensions & layout", "Interior style preferences", "Colour palette preferences", "AR/room visualisation session data"] },
-      { id: "analytics", label: "Analytics", description: "Anonymised data to improve product discovery and room planning tools.", necessary: false, dataPoints: ["Products viewed & time on page", "Room planner usage", "Search & filter behaviour", "Device type"] },
-      { id: "marketing", label: "Marketing", description: "New collection launches, style inspiration, and personalised offers.", necessary: false, dataPoints: ["Purchase & browsing history", "Style preference signals", "Email & notification engagement"] },
+      { id: "essential", label: "Needed to run your order", description: "The basics we can't skip — taking your order, payment, delivery, and setting up installation. This stays on because your order can't be completed without it.", necessary: true, dataPoints: ["Name, email & phone", "Precise delivery address", "Payment confirmation", "Order & warranty records"] },
+      { id: "home_profile", label: "My room details", description: "Room sizes and style preferences so you can see how products would look and fit in your space. Off until you turn it on.", necessary: false, dataPoints: ["Room dimensions & layout", "Interior style preferences", "Colour palette preferences", "AR/room visualisation session data"] },
+      { id: "analytics", label: "Help improve the site", description: "Shows us, in aggregate, how people browse and use the room planner so we can improve them. Off until you turn it on.", necessary: false, dataPoints: ["Products viewed & time on page", "Room planner usage", "Search & filter behaviour", "Device type"] },
+      { id: "marketing", label: "New launches & offers", description: "Lets us send you new collections, style ideas, and offers matched to you. Off until you turn it on — your shopping works fine without it.", necessary: false, dataPoints: ["Purchase & browsing history", "Style preference signals", "Email & notification engagement"] },
     ],
     journeyStages: [
       { stage: "Browsing & Inspiration", icon: "🛋️", dataCollected: [{ field: "Device & browser info", why: "Site rendering", necessary: true }, { field: "Products & collections viewed", why: "Improve recommendations", necessary: false }, { field: "Room style quiz responses", why: "Personalised curation", necessary: false }] },
@@ -594,10 +597,10 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
       "Promotional offers and new collection launches",
     ],
     purposeGroups: [
-      { id: "essential", label: "Essential", description: "Required to process orders, handle payments, and manage returns. Cannot be disabled.", necessary: true, dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history"] },
-      { id: "functional", label: "Functional", description: "Saves your gifting preferences, wishlists, and subscription settings.", necessary: false, dataPoints: ["Wishlist & saved items", "Gift message history", "Subscription preferences", "Saved addresses"] },
-      { id: "analytics", label: "Analytics", description: "Anonymised data to improve product discovery and content relevance.", necessary: false, dataPoints: ["Products viewed & time spent", "Search queries", "Collection interactions", "Device type"] },
-      { id: "marketing", label: "Marketing", description: "Personalised offers, new launch alerts, and occasion-based gifting reminders.", necessary: false, dataPoints: ["Purchase history", "Occasion & gifting preferences", "Email & notification engagement", "Repurchase cycle"] },
+      { id: "essential", label: "Needed to run your order", description: "The basics we can't skip — taking your order, payment, and handling returns. This stays on because your order can't be completed without it.", necessary: true, dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history"] },
+      { id: "functional", label: "Remember my preferences", description: "Saves your wishlists, gift messages, and subscription settings so you don't redo them each visit. Off until you turn it on.", necessary: false, dataPoints: ["Wishlist & saved items", "Gift message history", "Subscription preferences", "Saved addresses"] },
+      { id: "analytics", label: "Help improve the site", description: "Shows us, in aggregate, how people browse so we can make products easier to find. Off until you turn it on.", necessary: false, dataPoints: ["Products viewed & time spent", "Search queries", "Collection interactions", "Device type"] },
+      { id: "marketing", label: "Offers & gifting reminders", description: "Lets us send you offers, new-launch alerts, and occasion-based gifting nudges matched to you. Off until you turn it on — your shopping works fine without it.", necessary: false, dataPoints: ["Purchase history", "Occasion & gifting preferences", "Email & notification engagement", "Repurchase cycle"] },
     ],
     journeyStages: [
       { stage: "Browsing & Discovery", icon: "🕯️", dataCollected: [{ field: "Device & browser info", why: "Site rendering & security", necessary: true }, { field: "Products & collections viewed", why: "Improve recommendations", necessary: false }, { field: "Search terms", why: "Better product discovery", necessary: false }] },
@@ -626,10 +629,10 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
       "Personalised offers and new product alerts",
     ],
     purposeGroups: [
-      { id: "essential", label: "Essential", description: "Required to process orders and deliver products. Cannot be disabled.", necessary: true, dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history"] },
-      { id: "pet_profile", label: "Pet Profile", description: "Your pet's species, breed, age, and health notes — used only to recommend safe products.", necessary: false, dataPoints: ["Pet name & species", "Breed & age", "Weight & size", "Known health conditions or allergies"] },
-      { id: "analytics", label: "Analytics", description: "Anonymised data to improve product curation and subscription management.", necessary: false, dataPoints: ["Products browsed", "Search queries", "Subscription patterns", "Device type"] },
-      { id: "marketing", label: "Marketing", description: "Auto-replenishment reminders, new product alerts, and personalised deals.", necessary: false, dataPoints: ["Purchase history", "Pet profile for targeting", "Email & notification engagement", "Subscription cycle data"] },
+      { id: "essential", label: "Needed to run your order", description: "The basics we can't skip — taking your order, payment, and delivery. This stays on because your order can't be completed without it.", necessary: true, dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history"] },
+      { id: "pet_profile", label: "My pet's details", description: "Your pet's type, breed, age, and any health notes, used only to suggest products that are safe for them. Off until you choose to share it.", necessary: false, dataPoints: ["Pet name & species", "Breed & age", "Weight & size", "Known health conditions or allergies"] },
+      { id: "analytics", label: "Help improve the site", description: "Shows us, in aggregate, how people browse so we can improve our range and subscriptions. Off until you turn it on.", necessary: false, dataPoints: ["Products browsed", "Search queries", "Subscription patterns", "Device type"] },
+      { id: "marketing", label: "Reminders & deals", description: "Lets us send you refill reminders, new-product alerts, and deals matched to you and your pet. Off until you turn it on — your shopping works fine without it.", necessary: false, dataPoints: ["Purchase history", "Pet profile for targeting", "Email & notification engagement", "Subscription cycle data"] },
     ],
     journeyStages: [
       { stage: "Browsing", icon: "🐾", dataCollected: [{ field: "Device & browser info", why: "Site rendering", necessary: true }, { field: "Pet category browsing", why: "Relevant product display", necessary: false }] },
@@ -657,10 +660,10 @@ const RULES: Record<DPDPCategory, CategoryRules> = {
       "Promotional offers and new gear launches",
     ],
     purposeGroups: [
-      { id: "essential", label: "Essential", description: "Required to process orders and manage your account. Cannot be disabled.", necessary: true, dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history"] },
-      { id: "fitness_profile", label: "Fitness Profile", description: "Your fitness goals and body measurements for accurate sizing and supplement recommendations.", necessary: false, dataPoints: ["Height, weight & body type", "Fitness goals (strength, endurance, weight loss)", "Activity level", "Preferred sports/training type"] },
-      { id: "analytics", label: "Analytics", description: "Anonymised data to improve product curation and content.", necessary: false, dataPoints: ["Products browsed", "Search queries", "Category interactions", "Device type"] },
-      { id: "marketing", label: "Marketing", description: "New gear launches, training content, and personalised deals based on your sport.", necessary: false, dataPoints: ["Purchase & activity history", "Fitness goals for targeting", "Email & notification engagement"] },
+      { id: "essential", label: "Needed to run your order", description: "The basics we can't skip — taking your order, payment, and managing your account. This stays on because your order can't be completed without it.", necessary: true, dataPoints: ["Name, email & phone", "Delivery address", "Payment confirmation", "Order history"] },
+      { id: "fitness_profile", label: "My fitness details", description: "Your goals and body measurements, used to get sizing right and suggest the right gear and supplements. Off until you choose to share it.", necessary: false, dataPoints: ["Height, weight & body type", "Fitness goals (strength, endurance, weight loss)", "Activity level", "Preferred sports/training type"] },
+      { id: "analytics", label: "Help improve the site", description: "Shows us, in aggregate, how people browse so we can improve our range and content. Off until you turn it on.", necessary: false, dataPoints: ["Products browsed", "Search queries", "Category interactions", "Device type"] },
+      { id: "marketing", label: "New gear & deals", description: "Lets us send you new launches, training tips, and deals matched to your sport. Off until you turn it on — your shopping works fine without it.", necessary: false, dataPoints: ["Purchase & activity history", "Fitness goals for targeting", "Email & notification engagement"] },
     ],
     journeyStages: [
       { stage: "Browsing", icon: "🏃", dataCollected: [{ field: "Device & browser info", why: "Site rendering & security", necessary: true }, { field: "Category & product views", why: "Improve recommendations", necessary: false }] },
