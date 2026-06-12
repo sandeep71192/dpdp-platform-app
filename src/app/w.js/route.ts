@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   // Fetch client + published widget config
   const { data: client } = await supabaseAdmin
     .from('clients')
-    .select('id, name, client_key, is_active')
+    .select('id, name, client_key, is_active, owner_email')
     .eq('client_key', clientKey)
     .eq('is_active', true)
     .single()
@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
     groups: (config.purpose_groups as never) || [],
     translations: (config.translations as never) || {},
     apiBase,
+    grievanceEmail: client.owner_email || undefined,
     preview,
   })
 

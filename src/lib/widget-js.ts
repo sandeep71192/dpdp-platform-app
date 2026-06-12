@@ -21,6 +21,7 @@ interface WidgetData {
   groups: PurposeGroup[]
   translations: Record<string, Record<string, string>>
   apiBase: string
+  grievanceEmail?: string
   preview?: boolean
 }
 
@@ -33,6 +34,7 @@ export function generateWidgetJs(d: WidgetData): string {
   var KEY=${JSON.stringify(d.clientKey)};
   var API=${JSON.stringify(d.apiBase)};
   var B={name:${JSON.stringify(d.brandName)},primary:${JSON.stringify(d.primaryColor)}};
+  var GRIEV=${JSON.stringify(d.grievanceEmail || '')};
   var G=${JSON.stringify(enabledGroups)};
   var V=${JSON.stringify(VENDORS_MAP)};
   var TC=${JSON.stringify(TAG_COLORS)};
@@ -191,8 +193,14 @@ export function generateWidgetJs(d: WidgetData): string {
     h+='<button onclick="window._dpdpSave(\\'selection\\')" style="flex:1;padding:9px;border-radius:9px;font-size:10px;font-weight:700;border:1.5px solid '+B.primary+';background:#fff;color:'+B.primary+';cursor:pointer;font-family:inherit">'+t('customise')+'</button>';
     h+='<button onclick="window._dpdpSave(\\'all\\')" style="flex:1;padding:9px;border-radius:9px;font-size:10px;font-weight:700;border:none;background:'+B.primary+';color:#fff;cursor:pointer;font-family:inherit">'+t('allowAll')+'</button>';
     h+='</div>';
+    // Grievance redressal + complaint route (DPDP s.5 notice / s.13 grievance, Rules 2025).
+    // Always present so consumers can exercise rights and escalate to the Board.
+    h+='<div style="padding:9px 14px 4px;text-align:center;font-size:9px;color:#888;line-height:1.5">';
+    h+='For privacy queries or to exercise your data rights';
+    if(GRIEV){h+=', contact <a href="mailto:'+GRIEV+'" style="color:'+B.primary+';text-decoration:underline">'+GRIEV+'</a>';}
+    h+='. You may also lodge a grievance with the <span style="color:#555">Data Protection Board of India</span>.</div>';
     // Withdrawal link — shown once consent has been given (DPDP s.6: as easy to withdraw as to give).
-    if(hadConsent){h+='<div style="padding:0 14px 12px;text-align:center"><button onclick="window._dpdpWithdraw()" style="background:none;border:none;color:#b91c1c;font-size:10px;text-decoration:underline;cursor:pointer;font-family:inherit">Withdraw all consent</button></div>';}
+    if(hadConsent){h+='<div style="padding:2px 14px 12px;text-align:center"><button onclick="window._dpdpWithdraw()" style="background:none;border:none;color:#b91c1c;font-size:10px;text-decoration:underline;cursor:pointer;font-family:inherit">Withdraw all consent</button></div>';}
     h+='</div></div>';
     return h;
   }

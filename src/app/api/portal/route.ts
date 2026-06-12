@@ -30,5 +30,15 @@ export async function GET(request: NextRequest) {
     .limit(1)
     .single()
 
-  return NextResponse.json({ client, config })
+  // Widget health: timestamp of the most recent consent event for this client.
+  // Null means the widget has never reported in (not yet installed / not firing).
+  const { data: lastEvent } = await supabaseAdmin
+    .from('consent_events')
+    .select('created_at')
+    .eq('client_id', client.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  return NextResponse.json({ client, config, lastEventAt: lastEvent?.created_at ?? null })
 }

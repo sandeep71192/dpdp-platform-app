@@ -16,14 +16,35 @@ export default function WidgetPage() {
   const [activePlatform, setActivePlatform] = useState('shopify')
   const [copied, setCopied] = useState(false)
   const [appUrl, setAppUrl] = useState('')
+  const [lastEventAt, setLastEventAt] = useState<string | null | undefined>(undefined)
 
   useEffect(() => {
     setAppUrl(window.location.origin)
     fetch(`/api/portal?key=${clientKey}`).then(r => r.json()).then(d => {
       if (d.client) setClient(d.client)
       if (d.config) setConfig(d.config)
+      setLastEventAt(d.lastEventAt ?? null)
     })
   }, [clientKey])
+
+  // Real widget health from the last consent event received (no static badge).
+  // Active = event in last 48h; Idle = older; Not detected = never reported in.
+  const health = (() => {
+    if (lastEventAt === undefined) return { label: 'Checking…', cls: 'bg-zinc-100 text-zinc-500 border-zinc-200', dot: 'bg-zinc-400' }
+    if (lastEventAt === null) return { label: 'Not detected', cls: 'bg-amber-50 text-amber-700 border-amber-200', dot: 'bg-amber-500' }
+    const ageH = (Date.now() - new Date(lastEventAt).getTime()) / 3_600_000
+    if (ageH <= 48) return { label: 'Active', cls: 'bg-green-50 text-green-700 border-green-200', dot: 'bg-green-500' }
+    return { label: 'Idle', cls: 'bg-zinc-100 text-zinc-600 border-zinc-200', dot: 'bg-zinc-400' }
+  })()
+
+  function ago(iso: string) {
+    const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+    if (m < 1) return 'just now'
+    if (m < 60) return `${m}m ago`
+    const h = Math.floor(m / 60)
+    if (h < 24) return `${h}h ago`
+    return `${Math.floor(h / 24)}d ago`
+  }
 
   const scriptTag = `<script src="${appUrl}/w.js?id=${clientKey}"></script>`
   const platform = PLATFORMS.find(p => p.id === activePlatform)!
@@ -82,8 +103,15 @@ export default function WidgetPage() {
         <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">Live Preview</h2>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">● Active</span>
+            <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${health.cls}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${health.dot}`}></span>{health.label}
+            </span>
           </div>
+          {lastEventAt
+            ? <p className="text-xs text-zinc-400 -mt-2 mb-3">Last consent event {ago(lastEventAt)}</p>
+            : lastEventAt === null
+              ? <p className="text-xs text-amber-600 -mt-2 mb-3">No events yet — install the embed code on your store to go live.</p>
+              : null}
           <div className="rounded-xl overflow-hidden border border-[#e8e8ee] bg-[#f0f0f8] relative" style={{ height: 460 }}>
             {appUrl && (
               <iframe
