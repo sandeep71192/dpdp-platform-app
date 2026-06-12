@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { getRulesForCategory, type DPDPCategory } from './dpdp-rules'
 import { LANGUAGES } from './widget-assets'
+import { detectTrackers, type DetectedTracker, type TrackerCategory } from './trackers'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -21,6 +22,7 @@ export interface BrandAnalysis {
   category: DPDPCategory
   confidence: number
   websiteDescription: string
+  detectedTrackers: Record<TrackerCategory, DetectedTracker[]>
 }
 
 function extractText(message: Anthropic.Message): string {
@@ -112,9 +114,13 @@ Return ONLY this JSON (no markdown):
     category: 'general_ecommerce',
     confidence: 50,
     websiteDescription: 'Indian e-commerce website',
+    detectedTrackers: { essential: [], functional: [], analytics: [], marketing: [] },
   }
 
-  return parseJson(extractText(message), fallback)
+  // Fingerprint the brand's actual tracking stack from the raw HTML (scripts intact).
+  const detectedTrackers = detectTrackers(html, domain)
+  const parsed = parseJson(extractText(message), fallback)
+  return { ...parsed, detectedTrackers }
 }
 
 export interface Translations {
@@ -162,5 +168,22 @@ export function buildPurposeGroups(category: DPDPCategory) {
     necessary: g.necessary,
     enabled: true,
     dataPoints: g.dataPoints,
+    trackers: [] as DetectedTracker[],
   }))
+}
+
+// Attach detected cookies/trackers to the matching purpose group. Trackers are only
+// attached to groups that exist for this brand, so categories a brand doesn't offer
+// (e.g. analytics/marketing on a children's site, removed under DPDP s.9(3)) silently
+// drop their detected trackers instead of resurrecting a prohibited purpose.
+export function attachTrackers(
+  groups: ReturnType<typeof buildPurposeGroups>,
+  detected: Record<TrackerCategory, DetectedTracker[]>
+) {
+  const keys: TrackerCategory[] = ['essential', 'functional', 'analytics', 'marketing']
+  return groups.map((g) =>
+    (keys as string[]).includes(g.id)
+      ? { ...g, trackers: detected[g.id as TrackerCategory] || [] }
+      : g
+  )
 }

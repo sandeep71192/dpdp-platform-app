@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { analyzeBrand, generateTranslations, buildPurposeGroups } from '@/lib/claude'
+import { analyzeBrand, generateTranslations, buildPurposeGroups, attachTrackers } from '@/lib/claude'
 import type { DPDPCategory } from '@/lib/dpdp-rules'
 
 export const maxDuration = 300
@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
 
     const analysis = await analyzeBrand(url)
     const translations = await generateTranslations(analysis.brand.name, analysis.category)
-    const purposeGroups = buildPurposeGroups(analysis.category as DPDPCategory)
+    const purposeGroups = attachTrackers(
+      buildPurposeGroups(analysis.category as DPDPCategory),
+      analysis.detectedTrackers
+    )
 
     return NextResponse.json({
       draft: {

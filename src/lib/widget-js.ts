@@ -4,6 +4,16 @@
 
 import { VENDORS_MAP, TAG_COLORS, LANGUAGES } from './widget-assets'
 
+interface Tracker {
+  name: string
+  domain: string
+  platform: string
+  provider: string
+  expiration: string
+  description: string
+  privacyUrl: string
+}
+
 interface PurposeGroup {
   id: string
   label: string
@@ -11,6 +21,7 @@ interface PurposeGroup {
   necessary: boolean
   enabled: boolean
   dataPoints: string[]
+  trackers?: Tracker[]
 }
 
 interface WidgetData {
@@ -40,7 +51,7 @@ export function generateWidgetJs(d: WidgetData): string {
   var TC=${JSON.stringify(TAG_COLORS)};
   var T=${JSON.stringify(d.translations)};
   var LANGS=${JSON.stringify(LANGUAGES)};
-  var lang='en',expanded=null,toggles={},hadConsent=false,sessionId=Math.random().toString(36).slice(2)+Date.now().toString(36);
+  var lang='en',expanded=null,activeCat=null,toggles={},hadConsent=false,sessionId=Math.random().toString(36).slice(2)+Date.now().toString(36);
   // DPDP s.6(1): consent needs a clear affirmative action — nothing non-essential
   // may be pre-ticked. Only genuinely necessary purposes start ON; the rest are OFF
   // until the user switches them on (or taps "Accept All").
@@ -159,38 +170,84 @@ export function generateWidgetJs(d: WidgetData): string {
     return h;
   }
 
+  // Itemised cookie/tracker card (DPDP s.5 itemised notice; s.11 recipients).
+  function trackerCard(tr){
+    var h='<div style="border:1px solid #eee;border-radius:10px;padding:9px 11px;margin-bottom:6px;background:#fff">';
+    h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;color:#111;word-break:break-all">'+tr.name+'</span><span style="flex:1"></span><span style="font-size:8px;font-weight:700;background:'+B.primary+'14;color:'+B.primary+';padding:2px 7px;border-radius:9px;flex-shrink:0">'+tr.provider+'</span></div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px">';
+    if(tr.platform){h+='<span style="font-size:8.5px;background:#f3f4f6;color:#555;padding:2px 7px;border-radius:6px">'+tr.platform+'</span>';}
+    if(tr.domain){h+='<span style="font-size:8.5px;background:#f3f4f6;color:#555;padding:2px 7px;border-radius:6px">'+tr.domain+'</span>';}
+    if(tr.expiration){h+='<span style="font-size:8.5px;background:#f3f4f6;color:#555;padding:2px 7px;border-radius:6px">⏱ '+tr.expiration+'</span>';}
+    h+='</div>';
+    h+='<p style="font-size:10px;color:#555;line-height:1.5;margin:0">'+tr.description+'</p>';
+    if(tr.privacyUrl){h+='<a href="'+tr.privacyUrl+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:4px;font-size:9px;color:'+B.primary+';text-decoration:underline">Provider privacy policy ↗</a>';}
+    return h+'</div>';
+  }
+
+  function renderDataProtectionPanel(){
+    var h='<div style="font-size:11px;color:#333;line-height:1.6">';
+    h+='<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:6px">Data protection at '+B.name+'</div>';
+    h+='<p style="font-size:10.5px;color:#555;margin:0 0 10px">Your information is handled by <b>'+B.name+'</b>, the business you\\'re buying from — the “Data Fiduciary” under India\\'s DPDP Act 2023. We collect only what we need, keep it secure, and never sell it.</p>';
+    h+='<div style="font-size:9px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Your rights</div>';
+    var rights=[['See your data','Ask what we hold about you and why.'],['Fix it','Correct or complete anything that\\'s wrong.'],['Delete it','Ask us to erase your data when it\\'s no longer needed.'],['Withdraw consent','Change your mind anytime — as easy as giving it.'],['Nominate','Name someone to act for you if you can\\'t.']];
+    rights.forEach(function(r){h+='<div style="display:flex;gap:7px;margin-bottom:5px"><span style="color:'+B.primary+';font-weight:700;flex-shrink:0">•</span><span style="font-size:10px;color:#444"><b>'+r[0]+'</b> — '+r[1]+'</span></div>';});
+    h+='<div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:10px;padding:10px 12px;margin-top:10px;font-size:10px;color:#555;line-height:1.6">';
+    h+='<b style="color:#111">Questions or complaints</b><br>For any privacy query or to exercise a right';
+    if(GRIEV){h+=', email <a href="mailto:'+GRIEV+'" style="color:'+B.primary+';text-decoration:underline">'+GRIEV+'</a>';}
+    h+='. If we don\\'t resolve it, you can complain to the <b>Data Protection Board of India</b>.</div>';
+    return h+'</div>';
+  }
+
   function renderModal(){
-    var h='<div id="dpdp-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000000;align-items:center;justify-content:center;padding:16px">';
-    h+='<div style="background:#fff;border-radius:18px;width:100%;max-width:520px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">';
-    h+='<div style="padding:18px 20px 12px;border-bottom:1px solid #f0f0f0;flex-shrink:0">';
-    h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px"><div style="width:32px;height:32px;border-radius:10px;background:'+B.primary+'18;display:flex;align-items:center;justify-content:center;font-size:16px">🛡️</div>';
-    h+='<div><div style="font-size:14px;font-weight:700;color:#111">'+t('title')+'</div><div style="font-size:10px;color:#777">'+B.name+' · DPDP Act 2023</div></div></div>';
-    h+='<p style="font-size:10.5px;color:#555;line-height:1.5">'+t('body')+'</p>';
-    h+='<div style="display:flex;align-items:center;gap:5px;background:#f4f3ff;border:1px solid #e0dcff;padding:7px 10px;border-radius:8px;margin-top:7px;font-size:9.5px;color:#555">🇮🇳 Your data is protected under India\\'s Digital Personal Data Protection Act 2023.</div>';
-    h+='</div>';
-    h+='<div style="overflow-y:auto;flex:1;padding:10px 12px">';
-    G.forEach(function(g){
-      var on=g.necessary||toggles[g.id];var isOpen=expanded===g.id;var vc=V[g.id]||[];
-      h+='<div style="border:1px solid #f0f0f0;border-radius:11px;margin-bottom:7px;overflow:hidden">';
-      h+='<div onclick="window._dpdpExpand(\\''+g.id+'\\')" style="display:flex;align-items:center;gap:6px;padding:9px 11px;cursor:pointer;background:#fff">';
-      h+='<span style="font-size:8px;font-weight:700;padding:2px 7px;border-radius:10px;'+tc(g.id)+';flex-shrink:0">'+g.label+'</span>';
-      h+='<span style="font-size:8px;background:#f3f4f6;color:#555;padding:2px 6px;border-radius:7px;flex-shrink:0">Script tags</span><span style="flex:1"></span>';
-      if(g.necessary){h+='<span style="font-size:8.5px;color:#999;font-style:italic;margin-right:4px">Always on</span>';}
-      else{h+='<div onclick="event.stopPropagation();window._dpdpToggle(\\''+g.id+'\\')" style="width:34px;height:19px;border-radius:10px;background:'+(on?B.primary:'#ccc')+';position:relative;cursor:pointer;flex-shrink:0"><span style="position:absolute;top:2.5px;left:'+(on?'17px':'3px')+';width:14px;height:14px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span></div>';}
-      h+='<span style="font-size:10px;color:#ccc;margin-left:4px">'+(isOpen?'▲':'▼')+'</span></div>';
-      if(isOpen){
-        h+='<div style="padding:10px 12px 12px;background:#fafafa;border-top:1px solid #f0f0f0">';
-        h+='<p style="font-size:10.5px;color:#555;line-height:1.5;margin-bottom:8px">'+g.description+'</p>';
-        if(vc.length){h+='<div style="font-size:8.5px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Data Processors</div><table style="width:100%;border-collapse:collapse;font-size:9.5px">';
-          vc.forEach(function(v){h+='<tr><td style="padding:4px 0;border-bottom:1px solid #f0f0f0;color:#333">'+v.n+'<span style="background:#eee;color:#555;font-size:8px;padding:1px 5px;border-radius:6px;font-weight:600;margin-left:5px">'+v.c+'</span></td><td style="text-align:right;color:#bbb">↗</td></tr>';});
-          h+='</table>';}
-        h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:7px">';
-        g.dataPoints.forEach(function(dp){h+='<span style="font-size:9px;background:#f0f0f0;color:#555;padding:3px 7px;border-radius:7px">'+dp+'</span>';});
-        h+='</div></div>';
-      }
-      h+='</div>';
+    var groups=G;var ac=activeCat||(groups[0]&&groups[0].id)||'__dp';
+    var h='<div id="dpdp-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000000;align-items:center;justify-content:center;padding:16px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">';
+    h+='<div style="background:#fff;border-radius:18px;width:100%;max-width:680px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">';
+    // Header
+    h+='<div style="padding:16px 18px 12px;border-bottom:1px solid #f0f0f0;flex-shrink:0">';
+    h+='<div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:10px;background:'+B.primary+'18;display:flex;align-items:center;justify-content:center;font-size:16px">🛡️</div>';
+    h+='<div style="flex:1"><div style="font-size:14px;font-weight:700;color:#111">'+t('title')+'</div><div style="font-size:10px;color:#777">'+B.name+' · DPDP Act 2023</div></div>';
+    h+='<button onclick="window._dpdpClose()" aria-label="Close" style="background:none;border:none;font-size:18px;color:#bbb;cursor:pointer;line-height:1">×</button></div>';
+    h+='<p style="font-size:10.5px;color:#555;line-height:1.5;margin:8px 0 0">'+t('body')+'</p></div>';
+    // Two-pane body
+    h+='<div style="display:flex;flex:1;min-height:0">';
+    // Left nav
+    h+='<div style="width:148px;flex-shrink:0;border-right:1px solid #f0f0f0;overflow-y:auto;padding:8px;background:#fafafa">';
+    groups.forEach(function(g){
+      var sel=ac===g.id;var on=g.necessary||toggles[g.id];
+      h+='<button onclick="window._dpdpTab(\\''+g.id+'\\')" style="display:flex;align-items:center;gap:6px;width:100%;text-align:left;padding:8px 9px;margin-bottom:3px;border:none;border-radius:9px;background:'+(sel?'#fff':'transparent')+';box-shadow:'+(sel?'0 1px 3px rgba(0,0,0,.08)':'none')+';cursor:pointer;font-family:inherit">';
+      h+='<span style="width:6px;height:6px;border-radius:50%;background:'+(g.necessary?'#9ca3af':(on?'#16a34a':'#d1d5db'))+';flex-shrink:0"></span>';
+      h+='<span style="font-size:10.5px;font-weight:'+(sel?'700':'500')+';color:'+(sel?'#111':'#555')+';line-height:1.2">'+g.label+'</span></button>';
     });
+    h+='<div style="height:1px;background:#e8e8e8;margin:7px 4px"></div>';
+    var dpsel=ac==='__dp';
+    h+='<button onclick="window._dpdpTab(\\'__dp\\')" style="display:block;width:100%;text-align:left;padding:8px 9px;border:none;border-radius:9px;background:'+(dpsel?'#fff':'transparent')+';box-shadow:'+(dpsel?'0 1px 3px rgba(0,0,0,.08)':'none')+';cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:'+(dpsel?'700':'500')+';color:'+(dpsel?'#111':'#555')+'">Data Protection Info</button>';
     h+='</div>';
+    // Right content
+    h+='<div style="flex:1;overflow-y:auto;padding:14px 16px;min-width:0">';
+    if(ac==='__dp'){
+      h+=renderDataProtectionPanel();
+    } else {
+      var g=null;for(var i=0;i<groups.length;i++){if(groups[i].id===ac)g=groups[i];}
+      if(g){
+        var on=g.necessary||toggles[g.id];
+        h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="flex:1"><div style="font-size:14px;font-weight:700;color:#111">'+g.label+'</div></div>';
+        if(g.necessary){h+='<span style="font-size:9px;font-weight:700;color:#16a34a;background:#dcfce7;padding:3px 9px;border-radius:9px">Always on</span>';}
+        else{h+='<div onclick="window._dpdpToggle(\\''+g.id+'\\')" style="width:40px;height:22px;border-radius:11px;background:'+(on?B.primary:'#ccc')+';position:relative;cursor:pointer;flex-shrink:0"><span style="position:absolute;top:2.5px;left:'+(on?'20px':'3px')+';width:17px;height:17px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span></div>';}
+        h+='</div>';
+        h+='<p style="font-size:11px;color:#555;line-height:1.6;margin:0 0 12px">'+g.description+'</p>';
+        var trk=g.trackers||[];
+        if(trk.length){
+          h+='<div style="font-size:9px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Cookies & trackers ('+trk.length+')</div>';
+          trk.forEach(function(tr){h+=trackerCard(tr);});
+        } else {
+          h+='<div style="font-size:9px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">What we collect</div><div style="display:flex;flex-wrap:wrap;gap:5px">';
+          g.dataPoints.forEach(function(dp){h+='<span style="font-size:9.5px;background:#f3f4f6;color:#555;padding:4px 9px;border-radius:7px">'+dp+'</span>';});
+          h+='</div>';
+        }
+      }
+    }
+    h+='</div></div>';
+    // Footer actions
     h+='<div style="padding:11px 14px;border-top:1px solid #f0f0f0;display:flex;gap:7px;flex-shrink:0">';
     h+='<button onclick="window._dpdpSave(\\'necessary\\')" style="flex:1;padding:9px;border-radius:9px;font-size:10px;font-weight:700;border:1.5px solid #ddd;background:#fff;color:#555;cursor:pointer;font-family:inherit">'+t('onlyNecessary')+'</button>';
     h+='<button onclick="window._dpdpSave(\\'selection\\')" style="flex:1;padding:9px;border-radius:9px;font-size:10px;font-weight:700;border:1.5px solid '+B.primary+';background:#fff;color:'+B.primary+';cursor:pointer;font-family:inherit">'+t('customise')+'</button>';
@@ -245,6 +302,8 @@ export function generateWidgetJs(d: WidgetData): string {
   window._dpdpSave=function(type){save(type);};
   window._dpdpWithdraw=function(){withdraw();};
   window._dpdpModal=function(){show('dpdp-modal');};
+  window._dpdpClose=function(){hide('dpdp-modal');};
+  window._dpdpTab=function(id){activeCat=id;rerender();};
   window._dpdpToggle=function(id){var g=G.find(function(x){return x.id===id;});if(g&&!g.necessary){toggles[id]=!toggles[id];rerender();}};
   window._dpdpExpand=function(id){expanded=expanded===id?null:id;rerender();};
   window._dpdpLang=function(l){lang=l;rerender();};
