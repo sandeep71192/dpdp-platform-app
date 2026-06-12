@@ -1,32 +1,52 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+function env(name: string): string {
+  const v = process.env[name]
+  if (!v) throw new Error(`Missing environment variable: ${name}`)
+  return v
+}
 
-// Browser client
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
-
-// Server client (with cookies for auth)
+// Server client (with cookies for auth) — created per request, already lazy.
 export async function createServerSupabase() {
   const cookieStore = await cookies()
-  return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll: () => cookieStore.getAll(),
-      setAll: (cookiesToSet) => {
-        cookiesToSet.forEach(({ name, value, options }) =>
-          cookieStore.set(name, value, options)
-        )
+  return createServerClient<Database>(
+    env('NEXT_PUBLIC_SUPABASE_URL'),
+    env('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          )
+        },
       },
-    },
+    }
+  )
+}
+
+// Lazy singletons via Proxy: the underlying client is NOT created at module load
+// (which would crash the Vercel build before env vars are available). It is created
+// on first property access at runtime, where env vars exist.
+function lazyClient(factory: () => SupabaseClient): SupabaseClient {
+  let instance: SupabaseClient | null = null
+  const get = () => (instance ??= factory())
+  return new Proxy({} as SupabaseClient, {
+    get: (_t, prop) => Reflect.get(get() as object, prop),
   })
 }
 
-// Admin client (bypasses RLS — server only). Untyped on purpose: we control the
-// data shape server-side and avoid the strict generated-types coupling here.
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: { autoRefreshToken: false, persistSession: false }
-})
+// Browser/anon client (used for auth helpers).
+export const supabase = lazyClient(() =>
+  createClient(env('NEXT_PUBLIC_SUPABASE_URL'), env('NEXT_PUBLIC_SUPABASE_ANON_KEY'))
+)
+
+// Admin client (bypasses RLS — server only).
+export const supabaseAdmin = lazyClient(() =>
+  createClient(env('NEXT_PUBLIC_SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+)
