@@ -1,0 +1,891 @@
+From b2366deebaf0b816c5171f3c4a66c6dab134aaa7 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 13 Jun 2026 09:24:11 +0000
+Subject: [PATCH 1/2] Add Consent Insights module: accept/reject rates, purpose
+ and language analytics
+
+---
+ src/app/api/analytics/route.ts                |   6 +-
+ .../api/dashboard/consent-analytics/route.ts  |  50 ++++++
+ .../api/dashboard/language-analytics/route.ts |  74 ++++++++
+ .../api/dashboard/purpose-analytics/route.ts  | 103 ++++++++++++
+ .../[clientKey]/consent-insights/page.tsx     | 158 ++++++++++++++++++
+ src/components/portal/ConsentRateCard.tsx     |  56 +++++++
+ .../portal/LanguageAnalyticsTable.tsx         |  42 +++++
+ src/components/portal/PortalShell.tsx         |   1 +
+ src/components/portal/PurposeCard.tsx         |  71 ++++++++
+ src/components/portal/RangeFilter.tsx         |  49 ++++++
+ src/lib/consent-aggregation.ts                | 107 ++++++++++++
+ src/lib/date-range.ts                         |  34 ++++
+ src/lib/lang-names.ts                         |   9 +
+ 13 files changed, 755 insertions(+), 5 deletions(-)
+ create mode 100644 src/app/api/dashboard/consent-analytics/route.ts
+ create mode 100644 src/app/api/dashboard/language-analytics/route.ts
+ create mode 100644 src/app/api/dashboard/purpose-analytics/route.ts
+ create mode 100644 src/app/portal/[clientKey]/consent-insights/page.tsx
+ create mode 100644 src/components/portal/ConsentRateCard.tsx
+ create mode 100644 src/components/portal/LanguageAnalyticsTable.tsx
+ create mode 100644 src/components/portal/PurposeCard.tsx
+ create mode 100644 src/components/portal/RangeFilter.tsx
+ create mode 100644 src/lib/consent-aggregation.ts
+ create mode 100644 src/lib/date-range.ts
+ create mode 100644 src/lib/lang-names.ts
+
+diff --git a/src/app/api/analytics/route.ts b/src/app/api/analytics/route.ts
+index 97d7159..3ec2aa1 100644
+--- a/src/app/api/analytics/route.ts
++++ b/src/app/api/analytics/route.ts
+@@ -1,6 +1,7 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { supabaseAdmin } from '@/lib/supabase'
+ import { getSessionContext, canAccessClient } from '@/lib/auth'
++import { LANG_NAMES } from '@/lib/lang-names'
+ 
+ export const dynamic = 'force-dynamic'
+ 
+@@ -12,11 +13,6 @@ interface EventRow {
+   created_at: string
+ }
+ 
+-const LANG_NAMES: Record<string, string> = {
+-  en: 'English', hi: 'Hindi', bn: 'Bengali', te: 'Telugu', mr: 'Marathi',
+-  ta: 'Tamil', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi', or: 'Odia',
+-}
+-
+ // GET /api/analytics?clientId=...&days=30
+ export async function GET(request: NextRequest) {
+   const clientId = request.nextUrl.searchParams.get('clientId')
+diff --git a/src/app/api/dashboard/consent-analytics/route.ts b/src/app/api/dashboard/consent-analytics/route.ts
+new file mode 100644
+index 0000000..1fd0398
+--- /dev/null
++++ b/src/app/api/dashboard/consent-analytics/route.ts
+@@ -0,0 +1,50 @@
++import { NextRequest, NextResponse } from 'next/server'
++import { supabaseAdmin } from '@/lib/supabase'
++import { getSessionContext, canAccessClient } from '@/lib/auth'
++import { resolveRange, previousRange } from '@/lib/date-range'
++import { fetchDecisionCounts } from '@/lib/consent-aggregation'
++
++export const dynamic = 'force-dynamic'
++
++// GET /api/dashboard/consent-analytics?key=CLIENT_KEY&range=today|7d|30d|90d|custom&from=&to=
++export async function GET(request: NextRequest) {
++  const key = request.nextUrl.searchParams.get('key')
++  if (!key) return NextResponse.json({ error: 'key required' }, { status: 400 })
++
++  const range = request.nextUrl.searchParams.get('range') || '30d'
++  const from = request.nextUrl.searchParams.get('from')
++  const to = request.nextUrl.searchParams.get('to')
++
++  const { data: client, error } = await supabaseAdmin
++    .from('clients')
++    .select('id')
++    .eq('client_key', key)
++    .single()
++
++  if (error || !client) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
++
++  const ctx = await getSessionContext()
++  if (!canAccessClient(ctx, client.id)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
++
++  const current = resolveRange(range, from, to)
++  const previous = previousRange(current)
++
++  const [curr, prev] = await Promise.all([
++    fetchDecisionCounts(client.id, current.since, current.until),
++    fetchDecisionCounts(client.id, previous.since, previous.until),
++  ])
++
++  return NextResponse.json({
++    acceptRate: curr.acceptRate,
++    rejectRate: curr.rejectRate,
++    totalAccepted: curr.accepted,
++    totalRejected: curr.rejected,
++    totalCustomised: curr.customised,
++    totalDecisions: curr.decisions,
++    acceptRateTrend: curr.acceptRate - prev.acceptRate,
++    rejectRateTrend: curr.rejectRate - prev.rejectRate,
++    previousAcceptRate: prev.acceptRate,
++    previousRejectRate: prev.rejectRate,
++    range,
++  })
++}
+diff --git a/src/app/api/dashboard/language-analytics/route.ts b/src/app/api/dashboard/language-analytics/route.ts
+new file mode 100644
+index 0000000..5fecd86
+--- /dev/null
++++ b/src/app/api/dashboard/language-analytics/route.ts
+@@ -0,0 +1,74 @@
++import { NextRequest, NextResponse } from 'next/server'
++import { supabaseAdmin } from '@/lib/supabase'
++import { getSessionContext, canAccessClient } from '@/lib/auth'
++import { resolveRange } from '@/lib/date-range'
++import { fetchDecisionRows, fetchEnabledLanguages } from '@/lib/consent-aggregation'
++import { languageName } from '@/lib/lang-names'
++
++export const dynamic = 'force-dynamic'
++
++interface LanguageTotals {
++  accepted_all: number
++  rejected_all: number
++  customised: number
++  total: number
++}
++
++// GET /api/dashboard/language-analytics?key=CLIENT_KEY&range=today|7d|30d|90d|custom&from=&to=
++export async function GET(request: NextRequest) {
++  const key = request.nextUrl.searchParams.get('key')
++  if (!key) return NextResponse.json({ error: 'key required' }, { status: 400 })
++
++  const range = request.nextUrl.searchParams.get('range') || '30d'
++  const from = request.nextUrl.searchParams.get('from')
++  const to = request.nextUrl.searchParams.get('to')
++
++  const { data: client, error } = await supabaseAdmin
++    .from('clients')
++    .select('id')
++    .eq('client_key', key)
++    .single()
++
++  if (error || !client) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
++
++  const ctx = await getSessionContext()
++  if (!canAccessClient(ctx, client.id)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
++
++  const current = resolveRange(range, from, to)
++
++  const [rows, enabledLanguages] = await Promise.all([
++    fetchDecisionRows(client.id, current.since, current.until),
++    fetchEnabledLanguages(client.id),
++  ])
++
++  const langTotals: Record<string, LanguageTotals> = {}
++  for (const row of rows) {
++    const code = row.language_used || 'unknown'
++    const t = (langTotals[code] ??= { accepted_all: 0, rejected_all: 0, customised: 0, total: 0 })
++    t.total++
++    if (row.event_type === 'accepted_all') t.accepted_all++
++    else if (row.event_type === 'rejected_all') t.rejected_all++
++    else if (row.event_type === 'customised') t.customised++
++  }
++
++  const totalDecisions = rows.length
++  // Union of widget-enabled languages (so newly added ones appear with zero
++  // data) and languages found in recorded consent decisions.
++  const codes = new Set<string>([...enabledLanguages, ...Object.keys(langTotals)])
++
++  const languages = Array.from(codes)
++    .map((code) => {
++      const t = langTotals[code] || { accepted_all: 0, rejected_all: 0, customised: 0, total: 0 }
++      return {
++        code,
++        language: languageName(code),
++        consents: t.total,
++        percentage: totalDecisions ? Math.round((t.total / totalDecisions) * 100) : 0,
++        acceptRate: t.total ? Math.round((t.accepted_all / t.total) * 100) : 0,
++        rejectRate: t.total ? Math.round((t.rejected_all / t.total) * 100) : 0,
++      }
++    })
++    .sort((a, b) => b.consents - a.consents)
++
++  return NextResponse.json({ languages, totalDecisions, range })
++}
+diff --git a/src/app/api/dashboard/purpose-analytics/route.ts b/src/app/api/dashboard/purpose-analytics/route.ts
+new file mode 100644
+index 0000000..e6f1370
+--- /dev/null
++++ b/src/app/api/dashboard/purpose-analytics/route.ts
+@@ -0,0 +1,103 @@
++import { NextRequest, NextResponse } from 'next/server'
++import { supabaseAdmin } from '@/lib/supabase'
++import { getSessionContext, canAccessClient } from '@/lib/auth'
++import { resolveRange } from '@/lib/date-range'
++import { fetchDecisionRows, fetchPurposeGroups, humanizePurposeId } from '@/lib/consent-aggregation'
++
++export const dynamic = 'force-dynamic'
++
++interface PurposeTotals {
++  accepted: number
++  rejected: number
++  total: number
++}
++
++// GET /api/dashboard/purpose-analytics?key=CLIENT_KEY&range=today|7d|30d|90d|custom&from=&to=
++export async function GET(request: NextRequest) {
++  const key = request.nextUrl.searchParams.get('key')
++  if (!key) return NextResponse.json({ error: 'key required' }, { status: 400 })
++
++  const range = request.nextUrl.searchParams.get('range') || '30d'
++  const from = request.nextUrl.searchParams.get('from')
++  const to = request.nextUrl.searchParams.get('to')
++
++  const { data: client, error } = await supabaseAdmin
++    .from('clients')
++    .select('id')
++    .eq('client_key', key)
++    .single()
++
++  if (error || !client) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
++
++  const ctx = await getSessionContext()
++  if (!canAccessClient(ctx, client.id)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
++
++  const current = resolveRange(range, from, to)
++  const trend = resolveRange('30d', null, null)
++
++  const [rows, trendRows, purposeGroups] = await Promise.all([
++    fetchDecisionRows(client.id, current.since, current.until),
++    fetchDecisionRows(client.id, trend.since, trend.until),
++    fetchPurposeGroups(client.id),
++  ])
++
++  // Current-period totals per purpose, keyed by the purpose id from consented_to.
++  const purposeTotals: Record<string, PurposeTotals> = {}
++  for (const row of rows) {
++    if (!row.consented_to) continue
++    for (const [purpose, granted] of Object.entries(row.consented_to)) {
++      const t = (purposeTotals[purpose] ??= { accepted: 0, rejected: 0, total: 0 })
++      t.total++
++      if (granted) t.accepted++
++      else t.rejected++
++    }
++  }
++
++  // Fixed 30-day daily trend per purpose, independent of the selected range.
++  const dailyMap: Record<string, Record<string, { accepted: number; rejected: number }>> = {}
++  for (const row of trendRows) {
++    if (!row.consented_to) continue
++    const day = row.created_at.slice(0, 10)
++    for (const [purpose, granted] of Object.entries(row.consented_to)) {
++      const byDay = (dailyMap[purpose] ??= {})
++      const d = (byDay[day] ??= { accepted: 0, rejected: 0 })
++      if (granted) d.accepted++
++      else d.rejected++
++    }
++  }
++
++  function buildTrend(purpose: string) {
++    const days: { date: string; accepted: number; rejected: number }[] = []
++    for (let i = 29; i >= 0; i--) {
++      const d = new Date()
++      d.setDate(d.getDate() - i)
++      const key = d.toISOString().slice(0, 10)
++      const entry = dailyMap[purpose]?.[key] || { accepted: 0, rejected: 0 }
++      days.push({ date: key, ...entry })
++    }
++    return days
++  }
++
++  const labelMap = new Map(purposeGroups.map((g) => [g.id, g.label]))
++  // Union of configured purposes (so newly added ones appear with zero data)
++  // and purposes found in recorded consent decisions (covers historical data
++  // for purposes no longer in the active config).
++  const purposeIds = new Set<string>([...purposeGroups.map((g) => g.id), ...Object.keys(purposeTotals)])
++
++  const purposes = Array.from(purposeIds)
++    .map((id) => {
++      const t = purposeTotals[id] || { accepted: 0, rejected: 0, total: 0 }
++      return {
++        purpose: id,
++        label: labelMap.get(id) || humanizePurposeId(id),
++        acceptRate: t.total ? Math.round((t.accepted / t.total) * 100) : 0,
++        accepted: t.accepted,
++        rejected: t.rejected,
++        total: t.total,
++        trend: buildTrend(id),
++      }
++    })
++    .sort((a, b) => b.total - a.total)
++
++  return NextResponse.json({ purposes, range })
++}
+diff --git a/src/app/portal/[clientKey]/consent-insights/page.tsx b/src/app/portal/[clientKey]/consent-insights/page.tsx
+new file mode 100644
+index 0000000..4796cb2
+--- /dev/null
++++ b/src/app/portal/[clientKey]/consent-insights/page.tsx
+@@ -0,0 +1,158 @@
++'use client'
++import { useState, useEffect, useCallback } from 'react'
++import { useParams } from 'next/navigation'
++import RangeFilter, { RangeKey } from '@/components/portal/RangeFilter'
++import ConsentRateCard from '@/components/portal/ConsentRateCard'
++import PurposeCard, { PurposeAnalytics } from '@/components/portal/PurposeCard'
++import LanguageAnalyticsTable, { LanguageAnalytics } from '@/components/portal/LanguageAnalyticsTable'
++
++interface ConsentAnalytics {
++  acceptRate: number
++  rejectRate: number
++  totalAccepted: number
++  totalRejected: number
++  totalDecisions: number
++  acceptRateTrend: number
++  rejectRateTrend: number
++}
++
++export default function ConsentInsightsPage() {
++  const { clientKey } = useParams<{ clientKey: string }>()
++  const [range, setRange] = useState<RangeKey>('30d')
++  const [from, setFrom] = useState('')
++  const [to, setTo] = useState('')
++
++  const [consent, setConsent] = useState<ConsentAnalytics | null>(null)
++  const [purposes, setPurposes] = useState<PurposeAnalytics[] | null>(null)
++  const [languages, setLanguages] = useState<LanguageAnalytics[] | null>(null)
++  const [loading, setLoading] = useState(true)
++  const [error, setError] = useState<string | null>(null)
++
++  const load = useCallback((r: RangeKey, f: string, t: string) => {
++    const params = new URLSearchParams({ key: String(clientKey), range: r })
++    if (r === 'custom') {
++      if (f) params.set('from', f)
++      if (t) params.set('to', t)
++    }
++    const qs = params.toString()
++
++    return Promise.all([
++      fetch(`/api/dashboard/consent-analytics?${qs}`).then((res) => res.json()),
++      fetch(`/api/dashboard/purpose-analytics?${qs}`).then((res) => res.json()),
++      fetch(`/api/dashboard/language-analytics?${qs}`).then((res) => res.json()),
++    ])
++      .then(([c, p, l]) => {
++        if (c.error || p.error || l.error) throw new Error('Failed to load')
++        setConsent(c)
++        setPurposes(p.purposes)
++        setLanguages(l.languages)
++        setError(null)
++      })
++      .catch(() => setError('Could not load consent insights. Try again shortly.'))
++      .finally(() => setLoading(false))
++  }, [clientKey])
++
++  useEffect(() => {
++    load('30d', '', '')
++  }, [load])
++
++  function handleRangeChange(r: RangeKey, f?: string, t?: string) {
++    const nextFrom = f ?? from
++    const nextTo = t ?? to
++    setRange(r)
++    if (f !== undefined) setFrom(f)
++    if (t !== undefined) setTo(t)
++    if (r === 'custom' && !nextFrom) return
++    setLoading(true)
++    setError(null)
++    load(r, nextFrom, nextTo)
++  }
++
++  return (
++    <div className="p-8">
++      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
++        <div>
++          <h1 className="text-2xl font-bold text-[#1b1b29] tracking-tight">Consent Insights</h1>
++          <p className="text-sm text-zinc-500 mt-1">How visitors respond to your consent widget, by purpose and language</p>
++        </div>
++        <RangeFilter range={range} from={from} to={to} onChange={handleRangeChange} />
++      </div>
++
++      {error && (
++        <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-4 mb-6 text-sm text-red-500">{error}</div>
++      )}
++
++      {/* Section 1: Consent Analytics */}
++      <div className="mb-6">
++        <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">Consent Analytics</h2>
++        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
++          <ConsentRateCard
++            icon="✅"
++            label="Accept Rate"
++            rate={consent ? consent.acceptRate : null}
++            trend={consent ? consent.acceptRateTrend : null}
++            total={consent ? consent.totalAccepted : null}
++            totalLabel="accepted consents"
++            accent="green"
++            loading={loading && !consent}
++            error={consent ? null : error}
++          />
++          <ConsentRateCard
++            icon="🚫"
++            label="Reject Rate"
++            rate={consent ? consent.rejectRate : null}
++            trend={consent ? consent.rejectRateTrend : null}
++            total={consent ? consent.totalRejected : null}
++            totalLabel="rejected consents"
++            accent="red"
++            loading={loading && !consent}
++            error={consent ? null : error}
++          />
++        </div>
++      </div>
++
++      {/* Section 2: Purpose Analytics */}
++      <div className="mb-6">
++        <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">Purpose Analytics</h2>
++        {loading && !purposes ? (
++          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
++            {[0, 1, 2, 3].map((i) => (
++              <div key={i} className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-5 animate-pulse">
++                <div className="h-4 w-20 bg-black/[0.04] rounded mb-3" />
++                <div className="h-8 w-14 bg-black/[0.04] rounded mb-2" />
++                <div className="h-1.5 w-full bg-black/[0.04] rounded-full" />
++              </div>
++            ))}
++          </div>
++        ) : !purposes || purposes.length === 0 ? (
++          <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
++            <p className="text-sm text-zinc-500">No purposes configured yet. Add purpose categories in your widget configuration to see analytics here.</p>
++          </div>
++        ) : (
++          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
++            {purposes.map((p) => (
++              <PurposeCard key={p.purpose} data={p} />
++            ))}
++          </div>
++        )}
++      </div>
++
++      {/* Section 3: Language Analytics */}
++      <div>
++        <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">Language Analytics</h2>
++        {loading && !languages ? (
++          <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6 animate-pulse space-y-4">
++            {[0, 1, 2].map((i) => (
++              <div key={i}>
++                <div className="h-3 w-32 bg-black/[0.04] rounded mb-2" />
++                <div className="h-2 w-full bg-black/[0.04] rounded-full" />
++              </div>
++            ))}
++          </div>
++        ) : (
++          <LanguageAnalyticsTable data={languages || []} />
++        )}
++      </div>
++    </div>
++  )
++}
+diff --git a/src/components/portal/ConsentRateCard.tsx b/src/components/portal/ConsentRateCard.tsx
+new file mode 100644
+index 0000000..9c6e1cb
+--- /dev/null
++++ b/src/components/portal/ConsentRateCard.tsx
+@@ -0,0 +1,56 @@
++interface ConsentRateCardProps {
++  icon: string
++  label: string
++  rate: number | null
++  trend: number | null
++  total: number | null
++  totalLabel: string
++  accent: 'green' | 'red'
++  loading?: boolean
++  error?: string | null
++}
++
++export default function ConsentRateCard({ icon, label, rate, trend, total, totalLabel, accent, loading, error }: ConsentRateCardProps) {
++  const accentColor = accent === 'green' ? 'text-green-600' : 'text-red-500'
++  const barColor = accent === 'green' ? 'bg-green-500' : 'bg-red-400'
++
++  if (loading) {
++    return (
++      <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6 animate-pulse">
++        <div className="h-4 w-24 bg-black/[0.04] rounded mb-4" />
++        <div className="h-10 w-20 bg-black/[0.04] rounded mb-2" />
++        <div className="h-3 w-32 bg-black/[0.04] rounded" />
++      </div>
++    )
++  }
++
++  if (error || rate === null) {
++    return (
++      <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
++        <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">{label}</h3>
++        <p className="text-sm text-red-500">{error || 'No data available.'}</p>
++      </div>
++    )
++  }
++
++  const trendArrow = trend === null || trend === 0 ? null : trend > 0 ? '▲' : '▼'
++  const trendColor = trend === null ? '' : trend > 0 ? (accent === 'green' ? 'text-green-600' : 'text-red-500') : trend < 0 ? (accent === 'green' ? 'text-red-500' : 'text-green-600') : ''
++
++  return (
++    <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
++      <div className="flex items-center justify-between mb-3">
++        <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">{icon} {label}</h3>
++        {trendArrow && (
++          <span className={`text-xs font-semibold ${trendColor}`}>
++            {trendArrow} {Math.abs(trend!)}pp vs prev. period
++          </span>
++        )}
++      </div>
++      <div className={`text-3xl font-bold mb-2 ${accentColor}`}>{rate}%</div>
++      <div className="h-2 bg-[#e8e8ee] rounded-full overflow-hidden mb-2">
++        <div className={`h-full rounded-full ${barColor}`} style={{ width: `${rate}%` }} />
++      </div>
++      <div className="text-xs text-zinc-500">{total !== null ? total.toLocaleString() : '—'} {totalLabel}</div>
++    </div>
++  )
++}
+diff --git a/src/components/portal/LanguageAnalyticsTable.tsx b/src/components/portal/LanguageAnalyticsTable.tsx
+new file mode 100644
+index 0000000..b1abcca
+--- /dev/null
++++ b/src/components/portal/LanguageAnalyticsTable.tsx
+@@ -0,0 +1,42 @@
++export interface LanguageAnalytics {
++  code: string
++  language: string
++  consents: number
++  percentage: number
++  acceptRate: number
++  rejectRate: number
++}
++
++export default function LanguageAnalyticsTable({ data }: { data: LanguageAnalytics[] }) {
++  if (data.length === 0) {
++    return (
++      <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
++        <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">Language Analytics</h2>
++        <p className="text-sm text-zinc-500 py-4">No consent responses yet. Data appears once customers interact with your widget.</p>
++      </div>
++    )
++  }
++
++  return (
++    <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
++      <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-4">Language Analytics</h2>
++      <div className="space-y-4">
++        {data.map((l) => (
++          <div key={l.code}>
++            <div className="flex justify-between text-xs mb-1">
++              <span className="text-zinc-700 font-medium">{l.language}</span>
++              <span className="text-zinc-500">{l.consents.toLocaleString()} consents · {l.percentage}%</span>
++            </div>
++            <div className="h-2 bg-[#e8e8ee] rounded-full overflow-hidden mb-1.5">
++              <div className="h-full bg-gradient-to-r from-violet-500 to-violet-400 rounded-full" style={{ width: `${l.percentage}%` }} />
++            </div>
++            <div className="flex gap-4 text-xs">
++              <span className="text-green-600">Accept {l.acceptRate}%</span>
++              <span className="text-red-500">Reject {l.rejectRate}%</span>
++            </div>
++          </div>
++        ))}
++      </div>
++    </div>
++  )
++}
+diff --git a/src/components/portal/PortalShell.tsx b/src/components/portal/PortalShell.tsx
+index 693482a..0829348 100644
+--- a/src/components/portal/PortalShell.tsx
++++ b/src/components/portal/PortalShell.tsx
+@@ -30,6 +30,7 @@ export default function PortalShell({ clientKey, children }: { clientKey: string
+     { href: base, label: 'Overview', icon: '◈' },
+     { href: `${base}/widget`, label: 'My Widget', icon: '🛡️' },
+     { href: `${base}/analytics`, label: 'Analytics', icon: '📊' },
++    { href: `${base}/consent-insights`, label: 'Consent Insights', icon: '🤝' },
+     { href: `${base}/compliance`, label: 'Compliance', icon: '📋' },
+   ]
+ 
+diff --git a/src/components/portal/PurposeCard.tsx b/src/components/portal/PurposeCard.tsx
+new file mode 100644
+index 0000000..95d099a
+--- /dev/null
++++ b/src/components/portal/PurposeCard.tsx
+@@ -0,0 +1,71 @@
++'use client'
++import { useState } from 'react'
++
++export interface PurposeAnalytics {
++  purpose: string
++  label: string
++  acceptRate: number
++  accepted: number
++  rejected: number
++  total: number
++  trend: { date: string; accepted: number; rejected: number }[]
++}
++
++export default function PurposeCard({ data }: { data: PurposeAnalytics }) {
++  const [open, setOpen] = useState(false)
++  const maxTrend = Math.max(1, ...data.trend.map((d) => d.accepted + d.rejected))
++
++  return (
++    <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-5">
++      <button onClick={() => setOpen((o) => !o)} className="w-full text-left">
++        <div className="flex items-center justify-between mb-2">
++          <span className="text-sm font-semibold text-[#1b1b29]">{data.label}</span>
++          <span className="text-xs text-zinc-400">{open ? '▲' : '▼'}</span>
++        </div>
++        <div className="text-3xl font-bold text-violet-600 mb-1">{data.acceptRate}%</div>
++        <div className="h-1.5 bg-[#e8e8ee] rounded-full overflow-hidden mb-1">
++          <div className="h-full bg-violet-500 rounded-full" style={{ width: `${data.acceptRate}%` }} />
++        </div>
++        <div className="text-xs text-zinc-500">{data.total.toLocaleString()} decisions</div>
++      </button>
++
++      {open && (
++        <div className="mt-4 pt-4 border-t border-[#e8e8ee] space-y-3">
++          <div className="grid grid-cols-3 gap-2 text-center">
++            <div>
++              <div className="text-lg font-bold text-green-600">{data.accepted.toLocaleString()}</div>
++              <div className="text-xs text-zinc-500">Accepted</div>
++            </div>
++            <div>
++              <div className="text-lg font-bold text-red-500">{data.rejected.toLocaleString()}</div>
++              <div className="text-xs text-zinc-500">Rejected</div>
++            </div>
++            <div>
++              <div className="text-lg font-bold text-[#1b1b29]">{data.acceptRate}%</div>
++              <div className="text-xs text-zinc-500">Acceptance</div>
++            </div>
++          </div>
++          <div>
++            <div className="text-xs text-zinc-500 mb-1.5">Last 30 days</div>
++            <div className="flex items-end gap-[2px] h-12">
++              {data.trend.map((d) => {
++                const acceptedH = (d.accepted / maxTrend) * 100
++                const rejectedH = (d.rejected / maxTrend) * 100
++                return (
++                  <div
++                    key={d.date}
++                    className="flex-1 h-full flex flex-col-reverse"
++                    title={`${d.date}: ${d.accepted} accepted, ${d.rejected} rejected`}
++                  >
++                    <div className="w-full bg-violet-500 rounded-t-[1px]" style={{ height: `${acceptedH}%` }} />
++                    <div className="w-full bg-red-300" style={{ height: `${rejectedH}%` }} />
++                  </div>
++                )
++              })}
++            </div>
++          </div>
++        </div>
++      )}
++    </div>
++  )
++}
+diff --git a/src/components/portal/RangeFilter.tsx b/src/components/portal/RangeFilter.tsx
+new file mode 100644
+index 0000000..ea3b52a
+--- /dev/null
++++ b/src/components/portal/RangeFilter.tsx
+@@ -0,0 +1,49 @@
++export type RangeKey = 'today' | '7d' | '30d' | '90d' | 'custom'
++
++export const RANGE_LABELS: Record<RangeKey, string> = {
++  today: 'Today',
++  '7d': '7 Days',
++  '30d': '30 Days',
++  '90d': '90 Days',
++  custom: 'Custom',
++}
++
++interface RangeFilterProps {
++  range: RangeKey
++  from: string
++  to: string
++  onChange: (range: RangeKey, from?: string, to?: string) => void
++}
++
++export default function RangeFilter({ range, from, to, onChange }: RangeFilterProps) {
++  return (
++    <div className="flex flex-wrap items-center gap-2">
++      {(Object.keys(RANGE_LABELS) as RangeKey[]).map((key) => (
++        <button
++          key={key}
++          onClick={() => onChange(key)}
++          className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${range === key ? 'bg-violet-600 text-white' : 'bg-black/[0.04] text-zinc-500 hover:text-[#1b1b29]'}`}
++        >
++          {RANGE_LABELS[key]}
++        </button>
++      ))}
++      {range === 'custom' && (
++        <div className="flex items-center gap-2">
++          <input
++            type="date"
++            value={from}
++            onChange={(e) => onChange('custom', e.target.value, to)}
++            className="text-xs px-2 py-1.5 rounded-lg border border-[#e8e8ee] bg-white text-zinc-700"
++          />
++          <span className="text-zinc-400 text-xs">to</span>
++          <input
++            type="date"
++            value={to}
++            onChange={(e) => onChange('custom', from, e.target.value)}
++            className="text-xs px-2 py-1.5 rounded-lg border border-[#e8e8ee] bg-white text-zinc-700"
++          />
++        </div>
++      )}
++    </div>
++  )
++}
+diff --git a/src/lib/consent-aggregation.ts b/src/lib/consent-aggregation.ts
+new file mode 100644
+index 0000000..4412fca
+--- /dev/null
++++ b/src/lib/consent-aggregation.ts
+@@ -0,0 +1,107 @@
++import { supabaseAdmin } from './supabase'
++
++export const DECISION_TYPES = ['accepted_all', 'rejected_all', 'customised'] as const
++
++export interface DecisionCounts {
++  accepted: number
++  rejected: number
++  customised: number
++  decisions: number
++  acceptRate: number
++  rejectRate: number
++}
++
++// Aggregation-only counts (head requests) — scales to millions of consent_events.
++export async function fetchDecisionCounts(clientId: string, since: Date, until: Date): Promise<DecisionCounts> {
++  const [acceptedRes, rejectedRes, customisedRes] = await Promise.all([
++    supabaseAdmin.from('consent_events').select('*', { count: 'exact', head: true })
++      .eq('client_id', clientId).eq('event_type', 'accepted_all')
++      .gte('created_at', since.toISOString()).lte('created_at', until.toISOString()),
++    supabaseAdmin.from('consent_events').select('*', { count: 'exact', head: true })
++      .eq('client_id', clientId).eq('event_type', 'rejected_all')
++      .gte('created_at', since.toISOString()).lte('created_at', until.toISOString()),
++    supabaseAdmin.from('consent_events').select('*', { count: 'exact', head: true })
++      .eq('client_id', clientId).eq('event_type', 'customised')
++      .gte('created_at', since.toISOString()).lte('created_at', until.toISOString()),
++  ])
++
++  const accepted = acceptedRes.count || 0
++  const rejected = rejectedRes.count || 0
++  const customised = customisedRes.count || 0
++  const decisions = accepted + rejected + customised
++
++  return {
++    accepted,
++    rejected,
++    customised,
++    decisions,
++    acceptRate: decisions ? Math.round((accepted / decisions) * 100) : 0,
++    rejectRate: decisions ? Math.round((rejected / decisions) * 100) : 0,
++  }
++}
++
++export interface DecisionRow {
++  event_type: string
++  consented_to: Record<string, boolean> | null
++  language_used: string | null
++  created_at: string
++}
++
++// Row-level detail for purpose/language breakdowns, scoped to a date range.
++export async function fetchDecisionRows(clientId: string, since: Date, until: Date): Promise<DecisionRow[]> {
++  const { data } = await supabaseAdmin
++    .from('consent_events')
++    .select('event_type, consented_to, language_used, created_at')
++    .eq('client_id', clientId)
++    .in('event_type', DECISION_TYPES)
++    .gte('created_at', since.toISOString())
++    .lte('created_at', until.toISOString())
++    .order('created_at', { ascending: true })
++
++  return (data || []) as unknown as DecisionRow[]
++}
++
++export interface PurposeGroupMeta {
++  id: string
++  label: string
++}
++
++// Purpose groups configured in the client's published widget — drives the
++// purpose set so new purposes (any vertical) show up with no code changes.
++export async function fetchPurposeGroups(clientId: string): Promise<PurposeGroupMeta[]> {
++  const { data: config } = await supabaseAdmin
++    .from('widget_configs')
++    .select('purpose_groups')
++    .eq('client_id', clientId)
++    .eq('is_published', true)
++    .order('version', { ascending: false })
++    .limit(1)
++    .single()
++
++  const groups = Array.isArray(config?.purpose_groups)
++    ? (config!.purpose_groups as unknown as { id: string; label: string; enabled?: boolean }[])
++    : []
++
++  return groups.filter((g) => g.enabled !== false).map((g) => ({ id: g.id, label: g.label }))
++}
++
++// Languages enabled for the client's widget (translation bundles + default language).
++export async function fetchEnabledLanguages(clientId: string): Promise<string[]> {
++  const { data: config } = await supabaseAdmin
++    .from('widget_configs')
++    .select('translations, default_lang')
++    .eq('client_id', clientId)
++    .eq('is_published', true)
++    .order('version', { ascending: false })
++    .limit(1)
++    .single()
++
++  const translations = (config?.translations as Record<string, unknown> | null) || {}
++  const codes = new Set(Object.keys(translations))
++  if (config?.default_lang) codes.add(config.default_lang as string)
++  return Array.from(codes)
++}
++
++export function humanizePurposeId(id: string): string {
++  return id.replace(/[_-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
++}
+diff --git a/src/lib/date-range.ts b/src/lib/date-range.ts
+new file mode 100644
+index 0000000..c66e237
+--- /dev/null
++++ b/src/lib/date-range.ts
+@@ -0,0 +1,34 @@
++// Shared date-range resolution for consent analytics endpoints.
++export interface DateRange {
++  since: Date
++  until: Date
++}
++
++// range: 'today' | '7d' | '30d' | '90d' | 'custom'
++export function resolveRange(range: string, from: string | null, to: string | null): DateRange {
++  const now = new Date()
++  if (range === 'custom' && from) {
++    return { since: new Date(from), until: to ? new Date(to) : now }
++  }
++  const since = new Date(now)
++  switch (range) {
++    case 'today':
++      since.setHours(0, 0, 0, 0)
++      break
++    case '7d':
++      since.setDate(since.getDate() - 7)
++      break
++    case '90d':
++      since.setDate(since.getDate() - 90)
++      break
++    default:
++      since.setDate(since.getDate() - 30)
++  }
++  return { since, until: now }
++}
++
++// The immediately preceding period of the same duration, for trend comparisons.
++export function previousRange({ since, until }: DateRange): DateRange {
++  const durationMs = until.getTime() - since.getTime()
++  return { since: new Date(since.getTime() - durationMs), until: new Date(since.getTime()) }
++}
+diff --git a/src/lib/lang-names.ts b/src/lib/lang-names.ts
+new file mode 100644
+index 0000000..b524a61
+--- /dev/null
++++ b/src/lib/lang-names.ts
+@@ -0,0 +1,9 @@
++// Shared display names for ISO language codes used across consent analytics.
++export const LANG_NAMES: Record<string, string> = {
++  en: 'English', hi: 'Hindi', bn: 'Bengali', te: 'Telugu', mr: 'Marathi',
++  ta: 'Tamil', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi', or: 'Odia',
++}
++
++export function languageName(code: string): string {
++  return LANG_NAMES[code] || code.toUpperCase()
++}
+-- 
+2.43.0
+
