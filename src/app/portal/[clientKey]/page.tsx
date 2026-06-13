@@ -1,8 +1,10 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { formatNumber } from '@/lib/utils'
+import ComplianceScoreCard, { ScoreBreakdownItem } from '@/components/portal/ComplianceScoreCard'
+import StatCard from '@/components/portal/StatCard'
 
 interface Analytics {
   totals: { shown: number; accepted_all: number; rejected_all: number; customised: number }
@@ -13,10 +15,39 @@ interface Analytics {
   totalEvents: number
 }
 
+interface Overview {
+  complianceScore: number
+  scoreBreakdown: ScoreBreakdownItem[]
+  totalConsentsCollected: number
+  acceptanceRate: number
+  activePurposes: number
+  pendingRightsRequests: number
+  rightsRequestsConfigured: boolean
+}
+
+type AcceptanceRange = 'today' | '7d' | '30d'
+
+const RANGE_LABELS: Record<AcceptanceRange, string> = { today: 'Today', '7d': '7 Days', '30d': '30 Days' }
+
 export default function PortalOverview() {
   const { clientKey } = useParams<{ clientKey: string }>()
   const [client, setClient] = useState<{ id: string; name: string; is_active: boolean } | null>(null)
   const [stats, setStats] = useState<Analytics | null>(null)
+  const [overview, setOverview] = useState<Overview | null>(null)
+  const [overviewError, setOverviewError] = useState<string | null>(null)
+  const [overviewLoading, setOverviewLoading] = useState(true)
+  const [acceptanceRange, setAcceptanceRange] = useState<AcceptanceRange>('30d')
+
+  const fetchOverview = useCallback((range: AcceptanceRange) => {
+    return fetch(`/api/dashboard/overview?key=${clientKey}&range=${range}`)
+      .then(r => {
+        if (!r.ok) throw new Error('Failed to load overview')
+        return r.json()
+      })
+      .then((d: Overview) => { setOverview(d); setOverviewError(null) })
+      .catch(() => setOverviewError('Could not load dashboard data. Try again shortly.'))
+      .finally(() => setOverviewLoading(false))
+  }, [clientKey])
 
   useEffect(() => {
     fetch(`/api/portal?key=${clientKey}`).then(r => r.json()).then(d => {
@@ -27,6 +58,17 @@ export default function PortalOverview() {
     })
   }, [clientKey])
 
+  useEffect(() => {
+    fetchOverview('30d')
+  }, [fetchOverview])
+
+  function handleRangeChange(range: AcceptanceRange) {
+    setAcceptanceRange(range)
+    setOverviewLoading(true)
+    setOverviewError(null)
+    fetchOverview(range)
+  }
+
   const base = `/portal/${clientKey}`
 
   return (
@@ -34,6 +76,63 @@ export default function PortalOverview() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-[#1b1b29] tracking-tight">Welcome back{client ? `, ${client.name}` : ''} 👋</h1>
         <p className="text-sm text-zinc-500 mt-1">Your DPDP Act 2023 consent compliance at a glance</p>
+      </div>
+
+      {/* Compliance Score */}
+      <ComplianceScoreCard
+        score={overview ? overview.complianceScore : null}
+        breakdown={overview?.scoreBreakdown || []}
+        loading={overviewLoading && !overview}
+        error={overviewError}
+      />
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatCard
+          icon="🗂️"
+          label="Total Consents Collected"
+          value={overview ? formatNumber(overview.totalConsentsCollected) : null}
+          sub="All-time consent decisions"
+          loading={overviewLoading && !overview}
+          error={overview ? null : overviewError}
+        />
+        <StatCard
+          icon="✅"
+          label="Acceptance Rate"
+          value={overview ? `${overview.acceptanceRate}%` : null}
+          sub={`Accepted vs. total decisions (${RANGE_LABELS[acceptanceRange]})`}
+          loading={overviewLoading && !overview}
+          error={overview ? null : overviewError}
+          action={
+            <div className="flex gap-1">
+              {(Object.keys(RANGE_LABELS) as AcceptanceRange[]).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => handleRangeChange(r)}
+                  className={`text-xs px-2 py-1 rounded-lg font-medium transition-colors ${acceptanceRange === r ? 'bg-violet-600 text-white' : 'bg-black/[0.04] text-zinc-500 hover:text-[#1b1b29]'}`}
+                >
+                  {RANGE_LABELS[r]}
+                </button>
+              ))}
+            </div>
+          }
+        />
+        <StatCard
+          icon="🎯"
+          label="Active Purposes"
+          value={overview ? overview.activePurposes : null}
+          sub="Configured in your widget"
+          loading={overviewLoading && !overview}
+          error={overview ? null : overviewError}
+        />
+        <StatCard
+          icon="📨"
+          label="Rights Requests Pending"
+          value={overview ? overview.pendingRightsRequests : null}
+          sub={overview && !overview.rightsRequestsConfigured ? 'Workflow not yet configured' : 'Unresolved requests'}
+          loading={overviewLoading && !overview}
+          error={overview ? null : overviewError}
+        />
       </div>
 
       {/* Widget status banner */}
@@ -46,23 +145,6 @@ export default function PortalOverview() {
         <Link href={`${base}/widget`} className="px-4 py-2 bg-black/[0.04] hover:bg-black/[0.06] border border-black/[0.08] text-[#1b1b29] text-sm font-semibold rounded-xl transition-colors flex-shrink-0">
           View Widget →
         </Link>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        {[
-          { label: 'Consent Prompts', value: stats ? formatNumber(stats.totals.shown) : '—', icon: '👁️', sub: 'Last 30 days' },
-          { label: 'Consent Rate', value: stats ? `${stats.consentRate}%` : '—', icon: '🤝', sub: 'Users who responded' },
-          { label: 'Acceptance Rate', value: stats ? `${stats.acceptanceRate}%` : '—', icon: '✅', sub: 'Accepted all purposes' },
-          { label: 'Total Records', value: stats ? formatNumber(stats.totalEvents) : '—', icon: '🗂️', sub: 'Auditable events' },
-        ].map(s => (
-          <div key={s.label} className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-5">
-            <div className="text-2xl mb-3">{s.icon}</div>
-            <div className="text-2xl font-bold text-[#1b1b29] mb-1">{s.value}</div>
-            <div className="text-xs text-zinc-500">{s.label}</div>
-            <div className="text-xs text-violet-600 mt-1.5">{s.sub}</div>
-          </div>
-        ))}
       </div>
 
       <div className="grid grid-cols-3 gap-6">
