@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getSessionContext, canAccessClient } from '@/lib/auth'
+import { LANG_NAMES } from '@/lib/lang-names'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,11 +11,6 @@ interface EventRow {
   language_used: string | null
   device_type: string | null
   created_at: string
-}
-
-const LANG_NAMES: Record<string, string> = {
-  en: 'English', hi: 'Hindi', bn: 'Bengali', te: 'Telugu', mr: 'Marathi',
-  ta: 'Tamil', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi', or: 'Odia',
 }
 
 // GET /api/analytics?clientId=...&days=30
