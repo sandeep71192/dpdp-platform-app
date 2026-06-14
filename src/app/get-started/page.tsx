@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabaseBrowser } from '@/lib/supabase-browser'
@@ -22,6 +22,19 @@ export default function GetStarted() {
   const [error, setError] = useState('')
   const [childrenAck, setChildrenAck] = useState(false)
   const [acct, setAcct] = useState({ email: '', password: '', owner_name: '' })
+  const [previewHtml, setPreviewHtml] = useState('')
+
+  // Live preview of the REAL widget, rebuilt whenever a preview-relevant field changes
+  // (colour, position, enabled purposes) — name typing doesn't reload it.
+  const previewSig = draft ? JSON.stringify([draft.colors.primary, draft.position, draft.purposeGroups.map(g => [g.id, g.enabled])]) : ''
+  useEffect(() => {
+    if (step !== 'review' || !draft) return
+    let cancelled = false
+    fetch('/api/onboard/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(draft) })
+      .then(r => r.text()).then(html => { if (!cancelled) setPreviewHtml(html) }).catch(() => {})
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, previewSig])
 
   const isChildren = draft ? CHILDREN_CATEGORIES.includes(draft.category) : false
   const inputCls = 'w-full bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl px-3 py-2.5 text-sm text-[#1b1b29] placeholder-zinc-600 outline-none focus:border-violet-500 transition-colors'
@@ -73,7 +86,7 @@ export default function GetStarted() {
         <Link href="/login" className="text-sm text-zinc-500 hover:text-[#1b1b29]">Already have an account? <span className="text-violet-600">Log in</span></Link>
       </header>
 
-      <div className="max-w-2xl mx-auto px-6 py-12">
+      <div className={(step === 'review' ? 'max-w-5xl' : 'max-w-2xl') + ' mx-auto px-6 py-12'}>
         {/* HERO + URL */}
         {(step === 'url' || step === 'analyzing') && (
           <div className="text-center">
@@ -98,7 +111,18 @@ export default function GetStarted() {
         {step === 'review' && draft && (
           <div>
             <h2 className="text-2xl font-bold text-[#1b1b29] mb-1">Here&apos;s your widget</h2>
-            <p className="text-sm text-zinc-500 mb-6">Review and tweak anything — then create your account to go live.</p>
+            <p className="text-sm text-zinc-500 mb-6">This is the real, live widget — click <span className="font-semibold text-violet-600">Customise</span> on it to see the full cookie disclosure. Tweak anything on the right, then create your account to go live.</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            {/* LEFT — live, interactive preview of the real widget */}
+            <div className="lg:sticky lg:top-6">
+              <div className="rounded-2xl overflow-hidden border border-[#e8e8ee] bg-[#f0f0f8] relative" style={{ height: 520 }}>
+                {previewHtml
+                  ? <iframe srcDoc={previewHtml} title="Live widget preview" className="w-full h-full border-0" sandbox="allow-scripts allow-popups" />
+                  : <div className="absolute inset-0 flex items-center justify-center"><div className="w-8 h-8 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" /></div>}
+              </div>
+              <p className="text-[11px] text-zinc-500 mt-2 text-center">↑ Fully interactive — try Accept, Customise, and the language switcher. Free to preview; no account needed yet.</p>
+            </div>
+            {/* RIGHT — editable config */}
             <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6 space-y-5">
               <div className="flex items-center gap-3">
                 {draft.logo ? <img src={draft.logo} alt="" className="w-11 h-11 rounded-xl object-contain bg-black/[0.04]" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} /> : <div className="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold text-white" style={{ background: draft.colors.primary }}>{draft.name.charAt(0)}</div>}
@@ -127,8 +151,9 @@ export default function GetStarted() {
                 ))}</div>
               </div>
             </div>
+            </div>
             {error && <div className="mt-4 text-sm text-red-400">{error}</div>}
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3 mt-6 max-w-lg">
               <button onClick={() => setStep('url')} className="px-5 py-3 rounded-xl border border-[#e8e8ee] text-sm text-zinc-500 hover:text-[#1b1b29]">← Back</button>
               <button onClick={() => { setError(''); setStep('account') }} disabled={isChildren && !childrenAck} className="flex-1 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white font-semibold">Looks good — create my account →</button>
             </div>
