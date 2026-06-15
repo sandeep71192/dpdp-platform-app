@@ -1,0 +1,7 @@
+Dogfooding milestone: the platform now runs its own consent widget on its own site.
+
+- Self client_key: a5e36a2611559d37d667bd018202364e (domain dpdp-platform-app.vercel.app)
+- Honest essential-only config: discloses dpdp_consent + Supabase sb-access/refresh-token; no analytics/marketing (our site runs zero third-party trackers).
+- Embedded site-wide via src/components/SiteConsent.tsx in the root layout; positioned bottom-left to avoid clashing with the generator preview.
+- Companion change (commit b3297e5): super-admin Overview wired to real data (was hardcoded zeros).
+- Verified live on production.
