@@ -29,6 +29,7 @@ export default function PortalShell({ clientKey, children }: { clientKey: string
   const nav = [
     { href: base, label: 'Overview', icon: '◈' },
     { href: `${base}/widget`, label: 'My Widget', icon: '🛡️' },
+    { href: `${base}/customize`, label: 'Customize', icon: '🎨' },
     { href: `${base}/analytics`, label: 'Analytics', icon: '📊' },
     { href: `${base}/consent-insights`, label: 'Consent Insights', icon: '🤝' },
     { href: `${base}/compliance`, label: 'Compliance', icon: '📋' },
