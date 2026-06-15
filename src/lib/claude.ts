@@ -1,15 +1,19 @@
-import Anthropic from '@anthropic-ai/sdk'
+// No-API brand analysis + widget copy.
+//
+// The generator used to call the Anthropic API for (1) brand classification and
+// (2) 11-language copy. Both are now deterministic and free:
+//   - classification + brand extraction → heuristics (classify.ts)
+//   - translations → static pre-translated dictionaries (translations-static.ts)
+// This removes the API as a hard dependency, so the generator never breaks on billing,
+// is instant, and avoids AI-mistranslation liability. The onboarding review step lets
+// the user correct any wrong guess before publishing.
+
 import { getRulesForCategory, type DPDPCategory } from './dpdp-rules'
-import { LANGUAGES } from './widget-assets'
 import { detectTrackers, type DetectedTracker, type TrackerCategory } from './trackers'
+import { classifyBrand } from './classify'
+import { buildStaticTranslations, type Translations } from './translations-static'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
-const CATEGORIES = [
-  'fashion', 'skincare_beauty', 'food_beverage', 'electronics', 'kids_toys',
-  'health_wellness', 'finance', 'general_ecommerce', 'travel', 'home_furniture',
-  'lifestyle_gifting', 'pets', 'sports_fitness',
-]
+export type { Translations }
 
 export interface BrandAnalysis {
   brand: {
@@ -23,20 +27,6 @@ export interface BrandAnalysis {
   confidence: number
   websiteDescription: string
   detectedTrackers: Record<TrackerCategory, DetectedTracker[]>
-}
-
-function extractText(message: Anthropic.Message): string {
-  const block = message.content.find((b) => b.type === 'text')
-  return block && block.type === 'text' ? block.text : ''
-}
-
-function parseJson<T>(text: string, fallback: T): T {
-  try {
-    const clean = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-    return JSON.parse(clean) as T
-  } catch {
-    return fallback
-  }
 }
 
 async function fetchWebsiteHtml(url: string): Promise<string> {
@@ -64,99 +54,24 @@ export async function analyzeBrand(url: string): Promise<BrandAnalysis> {
   const domain = new URL(normalizedUrl).hostname.replace('www.', '')
 
   const html = await fetchWebsiteHtml(normalizedUrl)
-  const snippet = html
-    .slice(0, 12000)
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 5000)
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2000,
-    thinking: { type: 'adaptive' },
-    messages: [{
-      role: 'user',
-      content: `You are a brand analyst for Indian D2C websites. Analyze this website and return ONLY valid JSON.
-
-URL: ${normalizedUrl}
-Domain: ${domain}
-Page content: ${snippet}
-
-Classify into ONE of: ${CATEGORIES.join(', ')}
-
-Return ONLY this JSON (no markdown):
-{
-  "brand": {
-    "name": "Brand display name",
-    "domain": "${domain}",
-    "colors": { "primary": "#hex (dominant brand color)", "secondary": "#hex", "text": "#111111" },
-    "logo": "absolute logo URL if found else empty string",
-    "tagline": "brand tagline or short description"
-  },
-  "category": "one_of_the_13_categories",
-  "confidence": 85,
-  "websiteDescription": "1-2 sentence description of what this brand sells"
-}`,
-    }],
-  })
-
-  const fallback: BrandAnalysis = {
-    brand: {
-      name: domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1),
-      domain,
-      colors: { primary: '#6c63ff', secondary: '#ffffff', text: '#111111' },
-      logo: '',
-      tagline: '',
-    },
-    category: 'general_ecommerce',
-    confidence: 50,
-    websiteDescription: 'Indian e-commerce website',
-    detectedTrackers: { essential: [], functional: [], analytics: [], marketing: [] },
-  }
-
-  // Fingerprint the brand's actual tracking stack from the raw HTML (scripts intact).
+  // Heuristic classification + brand extraction (no API).
+  const c = classifyBrand(html, domain)
+  // Fingerprint the brand's actual tracking stack from the raw HTML.
   const detectedTrackers = detectTrackers(html, domain)
-  const parsed = parseJson(extractText(message), fallback)
-  return { ...parsed, detectedTrackers }
-}
 
-export interface Translations {
-  [lang: string]: {
-    title: string
-    body: string
-    allowAll: string
-    onlyNecessary: string
-    customise: string
-    poweredBy: string
+  return {
+    brand: c.brand,
+    category: c.category,
+    confidence: c.confidence,
+    websiteDescription: c.websiteDescription,
+    detectedTrackers,
   }
 }
 
-export async function generateTranslations(brandName: string, category: string): Promise<Translations> {
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 4000,
-    messages: [{
-      role: 'user',
-      content: `Generate DPDP Act 2023 consent widget copy for ${brandName}, an Indian ${category} brand.
-
-Return ONLY valid JSON (no markdown) with these exact language keys: en, hi, bn, te, mr, ta, gu, kn, ml, pa, or.
-Languages: ${LANGUAGES.map(([c, n]) => `${c}=${n}`).join(', ')}.
-
-Each language object needs: title, body (1-2 warm sentences about data privacy, under 25 words, native script), allowAll, onlyNecessary, customise, poweredBy.
-
-Structure:
-{ "en": { "title": "...", "body": "...", "allowAll": "...", "onlyNecessary": "...", "customise": "...", "poweredBy": "..." }, "hi": {...}, ... }`,
-    }],
-  })
-
-  const fallback: Translations = {
-    en: { title: 'We value your privacy', body: `We use data to improve your experience on ${brandName}, per India's DPDP Act 2023.`, allowAll: 'Accept All', onlyNecessary: 'Only Necessary', customise: 'Customise', poweredBy: 'Protected under DPDP Act 2023' },
-  }
-
-  return parseJson(extractText(message), fallback)
+// Static, pre-translated widget copy (no API).
+export function generateTranslations(brandName: string, _category?: string): Translations {
+  return buildStaticTranslations(brandName)
 }
 
 export function buildPurposeGroups(category: DPDPCategory) {
