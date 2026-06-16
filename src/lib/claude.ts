@@ -69,9 +69,9 @@ export async function analyzeBrand(url: string): Promise<BrandAnalysis> {
   }
 }
 
-// Static, pre-translated widget copy (no API).
-export function generateTranslations(brandName: string, _category?: string): Translations {
-  return buildStaticTranslations(brandName)
+// Static, pre-translated widget copy (no API). Body varies by business archetype.
+export function generateTranslations(brandName: string, category?: string): Translations {
+  return buildStaticTranslations(brandName, category)
 }
 
 export function buildPurposeGroups(category: DPDPCategory) {

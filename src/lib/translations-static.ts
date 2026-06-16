@@ -1,9 +1,9 @@
 // Static, pre-translated consent-widget copy in all 11 languages.
 //
-// The widget's copy is a small set of FIXED UI strings plus one templated sentence —
-// it does not need an LLM. Shipping it statically is free, instant, deterministic, and
-// removes the mistranslation-liability risk of AI-generated legal notices. These strings
-// should still get a native-speaker review pass before relying on them in production.
+// Fixed UI strings (title/buttons/poweredBy) are constant. The notice BODY now varies by
+// business archetype (retail / beauty-health / finance / travel / kids) so a finance site
+// reads differently from a skincare site — still fully static (no API), with the brand name
+// templated in. These strings should get a native-speaker review before legal reliance.
 
 export interface WidgetCopy {
   title: string
@@ -14,29 +14,114 @@ export interface WidgetCopy {
   poweredBy: string
 }
 
-const COPY: Record<string, WidgetCopy> = {
-  en: { title: 'We value your privacy', body: "{brand} uses your data to improve your experience, in line with India's DPDP Act 2023.", allowAll: 'Accept All', onlyNecessary: 'Only Necessary', customise: 'Customise', poweredBy: 'Protected under DPDP Act 2023' },
-  hi: { title: 'हम आपकी निजता का सम्मान करते हैं', body: '{brand} भारत के DPDP अधिनियम 2023 के अनुरूप आपके अनुभव को बेहतर बनाने के लिए आपके डेटा का उपयोग करता है।', allowAll: 'सभी स्वीकारें', onlyNecessary: 'केवल आवश्यक', customise: 'अनुकूलित करें', poweredBy: 'DPDP अधिनियम 2023 के तहत सुरक्षित' },
-  bn: { title: 'আমরা আপনার গোপনীয়তাকে সম্মান করি', body: '{brand} ভারতের DPDP আইন ২০২৩ অনুসারে আপনার অভিজ্ঞতা উন্নত করতে আপনার ডেটা ব্যবহার করে।', allowAll: 'সব গ্রহণ করুন', onlyNecessary: 'শুধু প্রয়োজনীয়', customise: 'কাস্টমাইজ করুন', poweredBy: 'DPDP আইন ২০২৩ দ্বারা সুরক্ষিত' },
-  te: { title: 'మేము మీ గోప్యతను గౌరవిస్తాము', body: '{brand} భారత DPDP చట్టం 2023కి అనుగుణంగా మీ అనుభవాన్ని మెరుగుపరచడానికి మీ డేటాను ఉపయోగిస్తుంది.', allowAll: 'అన్నీ అంగీకరించండి', onlyNecessary: 'అవసరమైనవి మాత్రమే', customise: 'అనుకూలీకరించండి', poweredBy: 'DPDP చట్టం 2023 ద్వారా రక్షించబడింది' },
-  mr: { title: 'आम्ही तुमच्या गोपनीयतेचा आदर करतो', body: '{brand} भारताच्या DPDP कायदा 2023 नुसार तुमचा अनुभव सुधारण्यासाठी तुमचा डेटा वापरते.', allowAll: 'सर्व स्वीकारा', onlyNecessary: 'फक्त आवश्यक', customise: 'सानुकूल करा', poweredBy: 'DPDP कायदा 2023 अंतर्गत संरक्षित' },
-  ta: { title: 'உங்கள் தனியுரிமையை நாங்கள் மதிக்கிறோம்', body: '{brand} இந்தியாவின் DPDP சட்டம் 2023 இற்கு இணங்க உங்கள் அனுபவத்தை மேம்படுத்த உங்கள் தரவைப் பயன்படுத்துகிறது.', allowAll: 'அனைத்தையும் ஏற்க', onlyNecessary: 'தேவையானவை மட்டும்', customise: 'தனிப்பயனாக்கு', poweredBy: 'DPDP சட்டம் 2023 இன் கீழ் பாதுகாக்கப்படுகிறது' },
-  gu: { title: 'અમે તમારી ગોપનીયતાનું સન્માન કરીએ છીએ', body: '{brand} ભારતના DPDP કાયદો 2023 અનુસાર તમારો અનુભવ સુધારવા માટે તમારા ડેટાનો ઉપયોગ કરે છે.', allowAll: 'બધું સ્વીકારો', onlyNecessary: 'ફક્ત જરૂરી', customise: 'કસ્ટમાઇઝ કરો', poweredBy: 'DPDP કાયદો 2023 હેઠળ સુરક્ષિત' },
-  kn: { title: 'ನಾವು ನಿಮ್ಮ ಗೌಪ್ಯತೆಯನ್ನು ಗೌರವಿಸುತ್ತೇವೆ', body: '{brand} ಭಾರತದ DPDP ಕಾಯಿದೆ 2023 ಕ್ಕೆ ಅನುಗುಣವಾಗಿ ನಿಮ್ಮ ಅನುಭವವನ್ನು ಸುಧಾರಿಸಲು ನಿಮ್ಮ ಡೇಟಾವನ್ನು ಬಳಸುತ್ತದೆ.', allowAll: 'ಎಲ್ಲವನ್ನೂ ಸ್ವೀಕರಿಸಿ', onlyNecessary: 'ಅಗತ್ಯವಿರುವುದು ಮಾತ್ರ', customise: 'ಕಸ್ಟಮೈಸ್ ಮಾಡಿ', poweredBy: 'DPDP ಕಾಯಿದೆ 2023 ರ ಅಡಿಯಲ್ಲಿ ಸಂರಕ್ಷಿತ' },
-  ml: { title: 'ഞങ്ങൾ നിങ്ങളുടെ സ്വകാര്യതയെ ബഹുമാനിക്കുന്നു', body: '{brand} ഇന്ത്യയുടെ DPDP നിയമം 2023 അനുസരിച്ച് നിങ്ങളുടെ അനുഭവം മെച്ചപ്പെടുത്താൻ നിങ്ങളുടെ ഡാറ്റ ഉപയോഗിക്കുന്നു.', allowAll: 'എല്ലാം സ്വീകരിക്കുക', onlyNecessary: 'ആവശ്യമുള്ളവ മാത്രം', customise: 'ഇഷ്ടാനുസൃതമാക്കുക', poweredBy: 'DPDP നിയമം 2023 പ്രകാരം സംരക്ഷിതം' },
-  pa: { title: 'ਅਸੀਂ ਤੁਹਾਡੀ ਨਿੱਜਤਾ ਦਾ ਸਤਿਕਾਰ ਕਰਦੇ ਹਾਂ', body: '{brand} ਭਾਰਤ ਦੇ DPDP ਐਕਟ 2023 ਅਨੁਸਾਰ ਤੁਹਾਡੇ ਅਨੁਭਵ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ ਤੁਹਾਡੇ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ।', allowAll: 'ਸਭ ਸਵੀਕਾਰ ਕਰੋ', onlyNecessary: 'ਸਿਰਫ਼ ਲੋੜੀਂਦੇ', customise: 'ਕਸਟਮਾਈਜ਼ ਕਰੋ', poweredBy: 'DPDP ਐਕਟ 2023 ਅਧੀਨ ਸੁਰੱਖਿਅਤ' },
-  or: { title: 'ଆମେ ଆପଣଙ୍କ ଗୋପନୀୟତାକୁ ସମ୍ମାନ କରୁ', body: '{brand} ଭାରତର DPDP ଆଇନ 2023 ଅନୁଯାୟୀ ଆପଣଙ୍କ ଅନୁଭବ ଉନ୍ନତ କରିବାକୁ ଆପଣଙ୍କ ତଥ୍ୟ ବ୍ୟବହାର କରେ।', allowAll: 'ସବୁ ଗ୍ରହଣ କରନ୍ତୁ', onlyNecessary: 'କେବଳ ଆବଶ୍ୟକ', customise: 'କଷ୍ଟମାଇଜ୍ କରନ୍ତୁ', poweredBy: 'DPDP ଆଇନ 2023 ଅଧୀନରେ ସୁରକ୍ଷିତ' },
+// Fixed labels per language (everything except the body).
+const LABELS: Record<string, Omit<WidgetCopy, 'body'>> = {
+  en: { title: 'We value your privacy', allowAll: 'Accept All', onlyNecessary: 'Only Necessary', customise: 'Customise', poweredBy: 'Protected under DPDP Act 2023' },
+  hi: { title: 'हम आपकी निजता का सम्मान करते हैं', allowAll: 'सभी स्वीकारें', onlyNecessary: 'केवल आवश्यक', customise: 'अनुकूलित करें', poweredBy: 'DPDP अधिनियम 2023 के तहत सुरक्षित' },
+  bn: { title: 'আমরা আপনার গোপনীয়তাকে সম্মান করি', allowAll: 'সব গ্রহণ করুন', onlyNecessary: 'শুধু প্রয়োজনীয়', customise: 'কাস্টমাইজ করুন', poweredBy: 'DPDP আইন ২০২৩ দ্বারা সুরক্ষিত' },
+  te: { title: 'మేము మీ గోప్యతను గౌరవిస్తాము', allowAll: 'అన్నీ అంగీకరించండి', onlyNecessary: 'అవసరమైనవి మాత్రమే', customise: 'అనుకూలీకరించండి', poweredBy: 'DPDP చట్టం 2023 ద్వారా రక్షించబడింది' },
+  mr: { title: 'आम्ही तुमच्या गोपनीयतेचा आदर करतो', allowAll: 'सर्व स्वीकारा', onlyNecessary: 'फक्त आवश्यक', customise: 'सानुकूल करा', poweredBy: 'DPDP कायदा 2023 अंतर्गत संरक्षित' },
+  ta: { title: 'உங்கள் தனியுரிமையை நாங்கள் மதிக்கிறோம்', allowAll: 'அனைத்தையும் ஏற்க', onlyNecessary: 'தேவையானவை மட்டும்', customise: 'தனிப்பயனாக்கு', poweredBy: 'DPDP சட்டம் 2023 இன் கீழ் பாதுகாக்கப்படுகிறது' },
+  gu: { title: 'અમે તમારી ગોપનીયતાનું સન્માન કરીએ છીએ', allowAll: 'બધું સ્વીકારો', onlyNecessary: 'ફક્ત જરૂરી', customise: 'કસ્ટમાઇઝ કરો', poweredBy: 'DPDP કાયદો 2023 હેઠળ સુરક્ષિત' },
+  kn: { title: 'ನಾವು ನಿಮ್ಮ ಗೌಪ್ಯತೆಯನ್ನು ಗೌರವಿಸುತ್ತೇವೆ', allowAll: 'ಎಲ್ಲವನ್ನೂ ಸ್ವೀಕರಿಸಿ', onlyNecessary: 'ಅಗತ್ಯವಿರುವುದು ಮಾತ್ರ', customise: 'ಕಸ್ಟಮೈಸ್ ಮಾಡಿ', poweredBy: 'DPDP ಕಾಯಿದೆ 2023 ರ ಅಡಿಯಲ್ಲಿ ಸಂರಕ್ಷಿತ' },
+  ml: { title: 'ഞങ്ങൾ നിങ്ങളുടെ സ്വകാര്യതയെ ബഹുമാനിക്കുന്നു', allowAll: 'എല്ലാം സ്വീകരിക്കുക', onlyNecessary: 'ആവശ്യമുള്ളവ മാത്രം', customise: 'ഇഷ്ടാനുസൃതമാക്കുക', poweredBy: 'DPDP നിയമം 2023 പ്രകാരം സംരക്ഷിതം' },
+  pa: { title: 'ਅਸੀਂ ਤੁਹਾਡੀ ਨਿੱਜਤਾ ਦਾ ਸਤਿਕਾਰ ਕਰਦੇ ਹਾਂ', allowAll: 'ਸਭ ਸਵੀਕਾਰ ਕਰੋ', onlyNecessary: 'ਸਿਰਫ਼ ਲੋੜੀਂਦੇ', customise: 'ਕਸਟਮਾਈਜ਼ ਕਰੋ', poweredBy: 'DPDP ਐਕਟ 2023 ਅਧੀਨ ਸੁਰੱਖਿਅਤ' },
+  or: { title: 'ଆମେ ଆପଣଙ୍କ ଗୋପନୀୟତାକୁ ସମ୍ମାନ କରୁ', allowAll: 'ସବୁ ଗ୍ରହଣ କରନ୍ତୁ', onlyNecessary: 'କେବଳ ଆବଶ୍ୟକ', customise: 'କଷ୍ଟମାଇଜ୍ କରନ୍ତୁ', poweredBy: 'DPDP ଆଇନ 2023 ଅଧୀନରେ ସୁରକ୍ଷିତ' },
+}
+
+type Archetype = 'retail' | 'beauty_health' | 'finance' | 'travel' | 'kids'
+
+// Body copy per archetype × language. {brand} is substituted at build time.
+const BODIES: Record<Archetype, Record<string, string>> = {
+  retail: {
+    en: "{brand} uses your data to process your orders and improve your experience — protected under India's DPDP Act 2023.",
+    hi: "{brand} आपके ऑर्डर पूरे करने और आपके अनुभव को बेहतर बनाने के लिए आपके डेटा का उपयोग करता है — भारत के DPDP अधिनियम 2023 के तहत सुरक्षित।",
+    bn: "{brand} আপনার অর্ডার সম্পূর্ণ করতে এবং আপনার অভিজ্ঞতা উন্নত করতে আপনার ডেটা ব্যবহার করে — ভারতের DPDP আইন ২০২৩ দ্বারা সুরক্ষিত।",
+    te: "{brand} మీ ఆర్డర్‌లను పూర్తి చేయడానికి మరియు మీ అనుభవాన్ని మెరుగుపరచడానికి మీ డేటాను ఉపయోగిస్తుంది — భారత DPDP చట్టం 2023 ద్వారా రక్షించబడింది.",
+    mr: "{brand} तुमच्या ऑर्डर पूर्ण करण्यासाठी आणि तुमचा अनुभव सुधारण्यासाठी तुमचा डेटा वापरते — भारताच्या DPDP कायदा 2023 अंतर्गत संरक्षित.",
+    ta: "{brand} உங்கள் ஆர்டர்களை நிறைவேற்றவும் உங்கள் அனுபவத்தை மேம்படுத்தவும் உங்கள் தரவைப் பயன்படுத்துகிறது — இந்தியாவின் DPDP சட்டம் 2023 இன் கீழ் பாதுகாக்கப்படுகிறது.",
+    gu: "{brand} તમારા ઓર્ડર પૂર્ણ કરવા અને તમારો અનુભવ સુધારવા માટે તમારા ડેટાનો ઉપયોગ કરે છે — ભારતના DPDP કાયદો 2023 હેઠળ સુરક્ષિત.",
+    kn: "{brand} ನಿಮ್ಮ ಆರ್ಡರ್‌ಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಲು ಮತ್ತು ನಿಮ್ಮ ಅನುಭವವನ್ನು ಸುಧಾರಿಸಲು ನಿಮ್ಮ ಡೇಟಾವನ್ನು ಬಳಸುತ್ತದೆ — ಭಾರತದ DPDP ಕಾಯಿದೆ 2023 ರ ಅಡಿಯಲ್ಲಿ ಸಂರಕ್ಷಿತ.",
+    ml: "{brand} നിങ്ങളുടെ ഓർഡറുകൾ പൂർത്തിയാക്കാനും നിങ്ങളുടെ അനുഭവം മെച്ചപ്പെടുത്താനും നിങ്ങളുടെ ഡാറ്റ ഉപയോഗിക്കുന്നു — ഇന്ത്യയുടെ DPDP നിയമം 2023 പ്രകാരം സംരക്ഷിതം.",
+    pa: "{brand} ਤੁਹਾਡੇ ਆਰਡਰ ਪੂਰੇ ਕਰਨ ਅਤੇ ਤੁਹਾਡੇ ਅਨੁਭਵ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ ਤੁਹਾਡੇ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ — ਭਾਰਤ ਦੇ DPDP ਐਕਟ 2023 ਅਧੀਨ ਸੁਰੱਖਿਅਤ।",
+    or: "{brand} ଆପଣଙ୍କ ଅର୍ଡର ସମ୍ପୂର୍ଣ୍ଣ କରିବା ଏବଂ ଆପଣଙ୍କ ଅନୁଭବ ଉନ୍ନତ କରିବା ପାଇଁ ଆପଣଙ୍କ ତଥ୍ୟ ବ୍ୟବହାର କରେ — ଭାରତର DPDP ଆଇନ 2023 ଅଧୀନରେ ସୁରକ୍ଷିତ।",
+  },
+  beauty_health: {
+    en: "{brand} uses your data to suggest products that suit you and keeps your personal details private — protected under India's DPDP Act 2023.",
+    hi: "{brand} आपके लिए उपयुक्त उत्पाद सुझाने के लिए आपके डेटा का उपयोग करता है और आपकी निजी जानकारी को गोपनीय रखता है — भारत के DPDP अधिनियम 2023 के तहत सुरक्षित।",
+    bn: "{brand} আপনার উপযুক্ত পণ্য সুপারিশ করতে আপনার ডেটা ব্যবহার করে এবং আপনার ব্যক্তিগত তথ্য গোপন রাখে — ভারতের DPDP আইন ২০২৩ দ্বারা সুরক্ষিত।",
+    te: "{brand} మీకు సరిపోయే ఉత్పత్తులను సూచించడానికి మీ డేటాను ఉపయోగిస్తుంది మరియు మీ వ్యక్తిగత వివరాలను గోప్యంగా ఉంచుతుంది — భారత DPDP చట్టం 2023 ద్వారా రక్షించబడింది.",
+    mr: "{brand} तुम्हाला योग्य उत्पादने सुचवण्यासाठी तुमचा डेटा वापरते आणि तुमची वैयक्तिक माहिती गोपनीय ठेवते — भारताच्या DPDP कायदा 2023 अंतर्गत संरक्षित.",
+    ta: "{brand} உங்களுக்கு ஏற்ற தயாரிப்புகளைப் பரிந்துரைக்க உங்கள் தரவைப் பயன்படுத்துகிறது, மேலும் உங்கள் தனிப்பட்ட விவரங்களை ரகசியமாக வைத்திருக்கிறது — இந்தியாவின் DPDP சட்டம் 2023 இன் கீழ் பாதுகாக்கப்படுகிறது.",
+    gu: "{brand} તમને યોગ્ય ઉત્પાદનો સૂચવવા માટે તમારા ડેટાનો ઉપયોગ કરે છે અને તમારી અંગત માહિતી ગોપનીય રાખે છે — ભારતના DPDP કાયદો 2023 હેઠળ સુરક્ષિત.",
+    kn: "{brand} ನಿಮಗೆ ಸೂಕ್ತವಾದ ಉತ್ಪನ್ನಗಳನ್ನು ಸೂಚಿಸಲು ನಿಮ್ಮ ಡೇಟಾವನ್ನು ಬಳಸುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ವಿವರಗಳನ್ನು ಗೌಪ್ಯವಾಗಿ ಇಡುತ್ತದೆ — ಭಾರತದ DPDP ಕಾಯಿದೆ 2023 ರ ಅಡಿಯಲ್ಲಿ ಸಂರಕ್ಷಿತ.",
+    ml: "{brand} നിങ്ങൾക്ക് അനുയോജ്യമായ ഉൽപ്പന്നങ്ങൾ നിർദ്ദേശിക്കാൻ നിങ്ങളുടെ ഡാറ്റ ഉപയോഗിക്കുന്നു, നിങ്ങളുടെ വ്യക്തിഗത വിവരങ്ങൾ രഹസ്യമായി സൂക്ഷിക്കുന്നു — ഇന്ത്യയുടെ DPDP നിയമം 2023 പ്രകാരം സംരക്ഷിതം.",
+    pa: "{brand} ਤੁਹਾਨੂੰ ਢੁਕਵੇਂ ਉਤਪਾਦ ਸੁਝਾਉਣ ਲਈ ਤੁਹਾਡੇ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ ਅਤੇ ਤੁਹਾਡੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਨੂੰ ਗੁਪਤ ਰੱਖਦਾ ਹੈ — ਭਾਰਤ ਦੇ DPDP ਐਕਟ 2023 ਅਧੀਨ ਸੁਰੱਖਿਅਤ।",
+    or: "{brand} ଆପଣଙ୍କ ପାଇଁ ଉପଯୁକ୍ତ ଉତ୍ପାଦ ସୁପାରିଶ କରିବାକୁ ଆପଣଙ୍କ ତଥ୍ୟ ବ୍ୟବହାର କରେ ଏବଂ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ସୂଚନା ଗୋପନୀୟ ରଖେ — ଭାରତର DPDP ଆଇନ 2023 ଅଧୀନରେ ସୁରକ୍ଷିତ।",
+  },
+  finance: {
+    en: "{brand} uses your data to verify your identity and assess your application securely — protected under India's DPDP Act 2023.",
+    hi: "{brand} आपकी पहचान सत्यापित करने और आपके आवेदन का सुरक्षित मूल्यांकन करने के लिए आपके डेटा का उपयोग करता है — भारत के DPDP अधिनियम 2023 के तहत सुरक्षित।",
+    bn: "{brand} আপনার পরিচয় যাচাই করতে এবং আপনার আবেদন নিরাপদে মূল্যায়ন করতে আপনার ডেটা ব্যবহার করে — ভারতের DPDP আইন ২০২৩ দ্বারা সুরক্ষিত।",
+    te: "{brand} మీ గుర్తింపును ధృవీకరించడానికి మరియు మీ దరఖాస్తును సురక్షితంగా అంచనా వేయడానికి మీ డేటాను ఉపయోగిస్తుంది — భారత DPDP చట్టం 2023 ద్వారా రక్షించబడింది.",
+    mr: "{brand} तुमची ओळख पडताळण्यासाठी आणि तुमच्या अर्जाचे सुरक्षित मूल्यांकन करण्यासाठी तुमचा डेटा वापरते — भारताच्या DPDP कायदा 2023 अंतर्गत संरक्षित.",
+    ta: "{brand} உங்கள் அடையாளத்தைச் சரிபார்க்கவும் உங்கள் விண்ணப்பத்தைப் பாதுகாப்பாக மதிப்பிடவும் உங்கள் தரவைப் பயன்படுத்துகிறது — இந்தியாவின் DPDP சட்டம் 2023 இன் கீழ் பாதுகாக்கப்படுகிறது.",
+    gu: "{brand} તમારી ઓળખ ચકાસવા અને તમારી અરજીનું સુરક્ષિત મૂલ્યાંકન કરવા માટે તમારા ડેટાનો ઉપયોગ કરે છે — ભારતના DPDP કાયદો 2023 હેઠળ સુરક્ષિત.",
+    kn: "{brand} ನಿಮ್ಮ ಗುರುತನ್ನು ಪರಿಶೀಲಿಸಲು ಮತ್ತು ನಿಮ್ಮ ಅರ್ಜಿಯನ್ನು ಸುರಕ್ಷಿತವಾಗಿ ಮೌಲ್ಯಮಾಪನ ಮಾಡಲು ನಿಮ್ಮ ಡೇಟಾವನ್ನು ಬಳಸುತ್ತದೆ — ಭಾರತದ DPDP ಕಾಯಿದೆ 2023 ರ ಅಡಿಯಲ್ಲಿ ಸಂರಕ್ಷಿತ.",
+    ml: "{brand} നിങ്ങളുടെ ഐഡന്റിറ്റി പരിശോധിക്കാനും നിങ്ങളുടെ അപേക്ഷ സുരക്ഷിതമായി വിലയിരുത്താനും നിങ്ങളുടെ ഡാറ്റ ഉപയോഗിക്കുന്നു — ഇന്ത്യയുടെ DPDP നിയമം 2023 പ്രകാരം സംരക്ഷിതം.",
+    pa: "{brand} ਤੁਹਾਡੀ ਪਛਾਣ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਅਤੇ ਤੁਹਾਡੀ ਅਰਜ਼ੀ ਦਾ ਸੁਰੱਖਿਅਤ ਮੁਲਾਂਕਣ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ — ਭਾਰਤ ਦੇ DPDP ਐਕਟ 2023 ਅਧੀਨ ਸੁਰੱਖਿਅਤ।",
+    or: "{brand} ଆପଣଙ୍କ ପରିଚୟ ଯାଞ୍ଚ କରିବାକୁ ଏବଂ ଆପଣଙ୍କ ଆବେଦନକୁ ସୁରକ୍ଷିତ ଭାବେ ମୂଲ୍ୟାୟନ କରିବାକୁ ଆପଣଙ୍କ ତଥ୍ୟ ବ୍ୟବହାର କରେ — ଭାରତର DPDP ଆଇନ 2023 ଅଧୀନରେ ସୁରକ୍ଷିତ।",
+  },
+  travel: {
+    en: "{brand} uses your data to manage your bookings and personalise your trips — protected under India's DPDP Act 2023.",
+    hi: "{brand} आपकी बुकिंग प्रबंधित करने और आपकी यात्राओं को वैयक्तिकृत करने के लिए आपके डेटा का उपयोग करता है — भारत के DPDP अधिनियम 2023 के तहत सुरक्षित।",
+    bn: "{brand} আপনার বুকিং পরিচালনা করতে এবং আপনার ভ্রমণ ব্যক্তিগতকৃত করতে আপনার ডেটা ব্যবহার করে — ভারতের DPDP আইন ২০২৩ দ্বারা সুরক্ষিত।",
+    te: "{brand} మీ బుకింగ్‌లను నిర్వహించడానికి మరియు మీ ప్రయాణాలను వ్యక్తిగతీకరించడానికి మీ డేటాను ఉపయోగిస్తుంది — భారత DPDP చట్టం 2023 ద్వారా రక్షించబడింది.",
+    mr: "{brand} तुमची बुकिंग व्यवस्थापित करण्यासाठी आणि तुमचा प्रवास वैयक्तिकृत करण्यासाठी तुमचा डेटा वापरते — भारताच्या DPDP कायदा 2023 अंतर्गत संरक्षित.",
+    ta: "{brand} உங்கள் முன்பதிவுகளை நிர்வகிக்கவும் உங்கள் பயணங்களைத் தனிப்பயனாக்கவும் உங்கள் தரவைப் பயன்படுத்துகிறது — இந்தியாவின் DPDP சட்டம் 2023 இன் கீழ் பாதுகாக்கப்படுகிறது.",
+    gu: "{brand} તમારી બુકિંગ સંચાલિત કરવા અને તમારી મુસાફરી વ્યક્તિગત કરવા માટે તમારા ડેટાનો ઉપયોગ કરે છે — ભારતના DPDP કાયદો 2023 હેઠળ સુરક્ષિત.",
+    kn: "{brand} ನಿಮ್ಮ ಬುಕಿಂಗ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಮತ್ತು ನಿಮ್ಮ ಪ್ರಯಾಣಗಳನ್ನು ವೈಯಕ್ತೀಕರಿಸಲು ನಿಮ್ಮ ಡೇಟಾವನ್ನು ಬಳಸುತ್ತದೆ — ಭಾರತದ DPDP ಕಾಯಿದೆ 2023 ರ ಅಡಿಯಲ್ಲಿ ಸಂರಕ್ಷಿತ.",
+    ml: "{brand} നിങ്ങളുടെ ബുക്കിംഗുകൾ കൈകാര്യം ചെയ്യാനും നിങ്ങളുടെ യാത്രകൾ വ്യക്തിഗതമാക്കാനും നിങ്ങളുടെ ഡാറ്റ ഉപയോഗിക്കുന്നു — ഇന്ത്യയുടെ DPDP നിയമം 2023 പ്രകാരം സംരക്ഷിതം.",
+    pa: "{brand} ਤੁਹਾਡੀਆਂ ਬੁਕਿੰਗਾਂ ਪ੍ਰਬੰਧਿਤ ਕਰਨ ਅਤੇ ਤੁਹਾਡੀਆਂ ਯਾਤਰਾਵਾਂ ਨੂੰ ਵਿਅਕਤੀਗਤ ਬਣਾਉਣ ਲਈ ਤੁਹਾਡੇ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ — ਭਾਰਤ ਦੇ DPDP ਐਕਟ 2023 ਅਧੀਨ ਸੁਰੱਖਿਅਤ।",
+    or: "{brand} ଆପଣଙ୍କ ବୁକିଂ ପରିଚାଳନା କରିବାକୁ ଏବଂ ଆପଣଙ୍କ ଯାତ୍ରାକୁ ବ୍ୟକ୍ତିଗତ କରିବାକୁ ଆପଣଙ୍କ ତଥ୍ୟ ବ୍ୟବହାର କରେ — ଭାରତର DPDP ଆଇନ 2023 ଅଧୀନରେ ସୁରକ୍ଷିତ।",
+  },
+  kids: {
+    en: "{brand} uses your data only to fulfil your order, and never tracks or targets children — as required by India's DPDP Act 2023.",
+    hi: "{brand} आपके डेटा का उपयोग केवल आपका ऑर्डर पूरा करने के लिए करता है, और बच्चों को कभी ट्रैक या लक्षित नहीं करता — भारत के DPDP अधिनियम 2023 के अनुसार।",
+    bn: "{brand} শুধুমাত্র আপনার অর্ডার সম্পূর্ণ করতে আপনার ডেটা ব্যবহার করে, এবং কখনও শিশুদের ট্র্যাক বা টার্গেট করে না — ভারতের DPDP আইন ২০২৩ অনুসারে।",
+    te: "{brand} మీ ఆర్డర్‌ను పూర్తి చేయడానికి మాత్రమే మీ డేటాను ఉపయోగిస్తుంది, మరియు పిల్లలను ఎప్పుడూ ట్రాక్ చేయదు లేదా లక్ష్యంగా చేసుకోదు — భారత DPDP చట్టం 2023 ప్రకారం.",
+    mr: "{brand} तुमचा डेटा फक्त तुमची ऑर्डर पूर्ण करण्यासाठी वापरते, आणि मुलांना कधीही ट्रॅक किंवा लक्ष्य करत नाही — भारताच्या DPDP कायदा 2023 नुसार.",
+    ta: "{brand} உங்கள் ஆர்டரை நிறைவேற்ற மட்டுமே உங்கள் தரவைப் பயன்படுத்துகிறது, குழந்தைகளை ஒருபோதும் கண்காணிக்காது அல்லது குறிவைக்காது — இந்தியாவின் DPDP சட்டம் 2023 படி.",
+    gu: "{brand} તમારા ડેટાનો ઉપયોગ ફક્ત તમારો ઓર્ડર પૂર્ણ કરવા માટે કરે છે, અને બાળકોને ક્યારેય ટ્રેક અથવા ટાર્ગેટ કરતું નથી — ભારતના DPDP કાયદો 2023 મુજબ.",
+    kn: "{brand} ನಿಮ್ಮ ಆರ್ಡರ್ ಪೂರ್ಣಗೊಳಿಸಲು ಮಾತ್ರ ನಿಮ್ಮ ಡೇಟಾವನ್ನು ಬಳಸುತ್ತದೆ, ಮತ್ತು ಮಕ್ಕಳನ್ನು ಎಂದಿಗೂ ಟ್ರ್ಯಾಕ್ ಅಥವಾ ಟಾರ್ಗೆಟ್ ಮಾಡುವುದಿಲ್ಲ — ಭಾರತದ DPDP ಕಾಯಿದೆ 2023 ರ ಪ್ರಕಾರ.",
+    ml: "{brand} നിങ്ങളുടെ ഓർഡർ പൂർത്തിയാക്കാൻ മാത്രം നിങ്ങളുടെ ഡാറ്റ ഉപയോഗിക്കുന്നു, കുട്ടികളെ ഒരിക്കലും ട്രാക്ക് ചെയ്യുകയോ ലക്ഷ്യമിടുകയോ ചെയ്യില്ല — ഇന്ത്യയുടെ DPDP നിയമം 2023 പ്രകാരം.",
+    pa: "{brand} ਤੁਹਾਡੇ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਸਿਰਫ਼ ਤੁਹਾਡਾ ਆਰਡਰ ਪੂਰਾ ਕਰਨ ਲਈ ਕਰਦਾ ਹੈ, ਅਤੇ ਬੱਚਿਆਂ ਨੂੰ ਕਦੇ ਟਰੈਕ ਜਾਂ ਟਾਰਗੇਟ ਨਹੀਂ ਕਰਦਾ — ਭਾਰਤ ਦੇ DPDP ਐਕਟ 2023 ਅਨੁਸਾਰ।",
+    or: "{brand} ଆପଣଙ୍କ ତଥ୍ୟ କେବଳ ଆପଣଙ୍କ ଅର୍ଡର ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ ବ୍ୟବହାର କରେ, ଏବଂ ପିଲାମାନଙ୍କୁ କେବେ ଟ୍ରାକ କିମ୍ବା ଟାର୍ଗେଟ କରେ ନାହିଁ — ଭାରତର DPDP ଆଇନ 2023 ଅନୁଯାୟୀ।",
+  },
 }
 
 export interface Translations { [lang: string]: WidgetCopy }
 
-// Build the per-brand translations object by substituting the brand name into each
-// language's templated body. No API call, no per-brand variation beyond the name.
-export function buildStaticTranslations(brandName: string): Translations {
+function archetypeFor(category?: string): Archetype {
+  switch (category) {
+    case 'finance': return 'finance'
+    case 'travel': return 'travel'
+    case 'kids_toys': return 'kids'
+    case 'skincare_beauty':
+    case 'health_wellness': return 'beauty_health'
+    default: return 'retail'
+  }
+}
+
+// Build the per-brand translations: fixed labels + a category-appropriate body, with the
+// brand name substituted. No API; only the brand name varies within an archetype+language.
+export function buildStaticTranslations(brandName: string, category?: string): Translations {
   const safe = (brandName || 'This store').trim()
+  const arch = archetypeFor(category)
   const out: Translations = {}
-  for (const [lang, c] of Object.entries(COPY)) {
-    out[lang] = { ...c, body: c.body.replace('{brand}', safe) }
+  for (const [lang, labels] of Object.entries(LABELS)) {
+    const bodyTpl = BODIES[arch][lang] || BODIES.retail.en
+    out[lang] = { ...labels, body: bodyTpl.replace('{brand}', safe) }
   }
   return out
 }
