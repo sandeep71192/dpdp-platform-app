@@ -124,6 +124,15 @@ export default function GetStarted() {
           <div>
             <h2 className="text-2xl font-bold text-[#1b1b29] mb-1">Here&apos;s your widget</h2>
             <p className="text-sm text-zinc-500 mb-6">This is the real, live widget — click <span className="font-semibold text-violet-600">Customise</span> on it to see the full cookie disclosure. Tweak anything on the right, then create your account to go live.</p>
+            {draft.confidence < 65 && (
+              <div className="mb-5 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                <span className="text-base leading-none mt-0.5">💡</span>
+                <p className="text-[13px] text-amber-800 leading-relaxed">
+                  We&apos;re tuned for D2C e-commerce, and we weren&apos;t fully sure about this site. Please double-check the{' '}
+                  <span className="font-semibold">Category</span>{' '}and the notice wording on the right before publishing — they drive your widget&apos;s copy.
+                </p>
+              </div>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             {/* LEFT — live, interactive preview of the real widget */}
             <div className="lg:sticky lg:top-6">
