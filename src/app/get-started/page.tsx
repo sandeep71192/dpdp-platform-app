@@ -26,7 +26,7 @@ export default function GetStarted() {
 
   // Live preview of the REAL widget, rebuilt whenever a preview-relevant field changes
   // (colour, position, enabled purposes) — name typing doesn't reload it.
-  const previewSig = draft ? JSON.stringify([draft.colors.primary, draft.position, draft.purposeGroups.map(g => [g.id, g.enabled])]) : ''
+  const previewSig = draft ? JSON.stringify([draft.colors.primary, draft.position, draft.purposeGroups.map(g => [g.id, g.enabled]), draft.translations?.en?.body]) : ''
   useEffect(() => {
     if (step !== 'review' || !draft) return
     let cancelled = false
@@ -35,6 +35,18 @@ export default function GetStarted() {
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, previewSig])
+
+  // Refresh the notice copy when the brand name or category changes in review, so the
+  // wording matches the chosen business type (debounced for name typing).
+  useEffect(() => {
+    if (step !== 'review' || !draft) return
+    const id = setTimeout(() => {
+      fetch('/api/onboard/translations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: draft.name, category: draft.category }) })
+        .then(r => r.json()).then(d => { if (d.translations) setDraft(prev => prev ? { ...prev, translations: d.translations } : prev) }).catch(() => {})
+    }, 500)
+    return () => clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, draft?.category, draft?.name])
 
   const isChildren = draft ? CHILDREN_CATEGORIES.includes(draft.category) : false
   const inputCls = 'w-full bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl px-3 py-2.5 text-sm text-[#1b1b29] placeholder-zinc-600 outline-none focus:border-violet-500 transition-colors'
