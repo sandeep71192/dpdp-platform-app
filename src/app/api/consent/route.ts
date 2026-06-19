@@ -58,6 +58,10 @@ function domainMatches(originHost: string, registered: string): boolean {
   return originHost === reg || originHost.endsWith(`.${reg}`)
 }
 
+// Dev/placeholder domains — skip enforcement so local or freshly-onboarded
+// clients aren't blocked before they've set their real production domain.
+const DEV_DOMAINS = new Set(['localhost', '127.0.0.1', '0.0.0.0'])
+
 function clientIp(request: NextRequest): string {
   const fwd = request.headers.get('x-forwarded-for')
   return (fwd ? fwd.split(',')[0] : '').trim() || 'unknown'
@@ -94,7 +98,7 @@ export async function POST(request: NextRequest) {
     // Domain validation: the event must come from the client's registered
     // domain. We trust the Origin/Referer header (set by the browser, not
     // forgeable from page JS) over the JS-supplied page_url.
-    if (client.domain) {
+    if (client.domain && !DEV_DOMAINS.has(client.domain.toLowerCase())) {
       const originHost =
         hostOf(request.headers.get('origin')) ?? hostOf(request.headers.get('referer'))
       if (!originHost || !domainMatches(originHost, client.domain)) {

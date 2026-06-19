@@ -1,8 +1,9 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
+import { supabaseBrowser } from '@/lib/supabase-browser'
 
 interface PortalClient {
   id: string
@@ -15,8 +16,14 @@ interface PortalClient {
 
 export default function PortalShell({ clientKey, children }: { clientKey: string; children: React.ReactNode }) {
   const path = usePathname()
+  const router = useRouter()
   const [client, setClient] = useState<PortalClient | null>(null)
   const [notFound, setNotFound] = useState(false)
+
+  async function logout() {
+    await supabaseBrowser.auth.signOut()
+    router.push('/login')
+  }
 
   useEffect(() => {
     fetch(`/api/portal?key=${clientKey}`)
@@ -87,6 +94,12 @@ export default function PortalShell({ clientKey, children }: { clientKey: string
             <div className="text-sm font-semibold text-violet-600 capitalize">{client?.plan || '—'}</div>
           </div>
           <div className="text-[10px] text-zinc-600 text-center mt-3">🔒 DPDP Act 2023 Compliant</div>
+          <button
+            onClick={logout}
+            className="mt-3 w-full text-xs font-semibold text-zinc-500 hover:text-red-500 hover:bg-red-500/5 rounded-xl px-3 py-2 transition-colors text-left"
+          >
+            Sign out
+          </button>
         </div>
       </aside>
 

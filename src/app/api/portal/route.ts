@@ -42,3 +42,32 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({ client, config, lastEventAt: lastEvent?.created_at ?? null })
 }
+
+// PATCH /api/portal?key=CLIENT_KEY — update the site domain (used when deploying to production).
+export async function PATCH(request: NextRequest) {
+  const key = request.nextUrl.searchParams.get('key')
+  if (!key) return NextResponse.json({ error: 'key required' }, { status: 400 })
+
+  const { data: client, error } = await supabaseAdmin
+    .from('clients')
+    .select('id')
+    .eq('client_key', key)
+    .single()
+
+  if (error || !client) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
+
+  const ctx = await getSessionContext()
+  if (!canAccessClient(ctx, client.id)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const body = await request.json()
+  const domain = typeof body.domain === 'string' ? body.domain.replace(/^https?:\/\//, '').replace(/\/$/, '').trim() : null
+  if (!domain) return NextResponse.json({ error: 'domain is required' }, { status: 400 })
+
+  const { error: updateErr } = await supabaseAdmin
+    .from('clients')
+    .update({ domain })
+    .eq('id', client.id)
+
+  if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
+  return NextResponse.json({ ok: true, domain })
+}

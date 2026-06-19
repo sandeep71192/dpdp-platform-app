@@ -12,20 +12,39 @@ const PLATFORMS = [
 export default function WidgetPage() {
   const { clientKey } = useParams<{ clientKey: string }>()
   const [config, setConfig] = useState<{ primary_color: string; category: string } | null>(null)
-  const [client, setClient] = useState<{ name: string } | null>(null)
+  const [client, setClient] = useState<{ name: string; domain: string } | null>(null)
   const [activePlatform, setActivePlatform] = useState('shopify')
   const [copied, setCopied] = useState(false)
   const [appUrl, setAppUrl] = useState('')
   const [lastEventAt, setLastEventAt] = useState<string | null | undefined>(undefined)
+  const [domainInput, setDomainInput] = useState('')
+  const [domainSaving, setDomainSaving] = useState(false)
+  const [domainSaved, setDomainSaved] = useState(false)
+  const [domainError, setDomainError] = useState('')
 
   useEffect(() => {
     setAppUrl(window.location.origin)
     fetch(`/api/portal?key=${clientKey}`).then(r => r.json()).then(d => {
-      if (d.client) setClient(d.client)
+      if (d.client) { setClient(d.client); setDomainInput(d.client.domain || '') }
       if (d.config) setConfig(d.config)
       setLastEventAt(d.lastEventAt ?? null)
     })
   }, [clientKey])
+
+  async function saveDomain() {
+    setDomainSaving(true); setDomainError(''); setDomainSaved(false)
+    const res = await fetch(`/api/portal?key=${clientKey}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain: domainInput }),
+    })
+    const data = await res.json()
+    if (!res.ok) { setDomainError(data.error || 'Failed to save'); setDomainSaving(false); return }
+    setClient(c => c ? { ...c, domain: data.domain } : c)
+    setDomainSaved(true)
+    setDomainSaving(false)
+    setTimeout(() => setDomainSaved(false), 3000)
+  }
 
   // Real widget health from the last consent event received (no static badge).
   // Active = event in last 48h; Idle = older; Not detected = never reported in.
@@ -75,6 +94,27 @@ export default function WidgetPage() {
               className="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors">
               {copied ? '✓ Copied!' : '📋 Copy Embed Code'}
             </button>
+          </div>
+
+          {/* Site domain — controls which origins can post consent events */}
+          <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
+            <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-1">Your Site Domain</h2>
+            <p className="text-xs text-zinc-400 mb-3">Only consent events from this domain are recorded. Update this when you move from localhost to your live site.</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={domainInput}
+                onChange={e => { setDomainInput(e.target.value); setDomainSaved(false) }}
+                placeholder="yourstore.netlify.app"
+                className="flex-1 text-sm border border-[#e8e8ee] rounded-xl px-3 py-2 bg-white text-[#1b1b29] placeholder:text-zinc-400 font-mono"
+              />
+              <button onClick={saveDomain} disabled={domainSaving}
+                className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap">
+                {domainSaving ? 'Saving…' : domainSaved ? '✓ Saved' : 'Save'}
+              </button>
+            </div>
+            {domainError && <p className="text-xs text-red-500 mt-1.5">{domainError}</p>}
+            <p className="text-[11px] text-zinc-400 mt-2">No <code className="font-mono">https://</code> needed. Subdomains match automatically (e.g. <code className="font-mono">shop.example.com</code> works for <code className="font-mono">example.com</code>).</p>
           </div>
 
           {/* Platform tabs */}
