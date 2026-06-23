@@ -162,8 +162,8 @@ export default function WidgetPage() {
             )}
           </div>
           <div className="mt-4 flex items-center gap-2 text-xs text-zinc-500">
-            <span className="w-3 h-3 rounded-sm" style={{ background: config?.primary_color || '#6c63ff' }}></span>
-            Brand color {config?.primary_color || '#6c63ff'} · Category: <span className="capitalize">{config?.category?.replace(/_/g, ' ') || '—'}</span>
+            <span className="w-3 h-3 rounded-sm" style={{ background: config?.primary_color || '#01A390' }}></span>
+            Brand color {config?.primary_color || '#01A390'} · Category: <span className="capitalize">{config?.category?.replace(/_/g, ' ') || '—'}</span>
           </div>
         </div>
       </div>

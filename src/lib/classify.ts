@@ -44,7 +44,7 @@ function countWord(text: string, word: string): number {
 // Use the site's theme-color only if it's a real brand colour — reject near-white/near-black
 // (common default theme-colors) which would make the widget accent invisible.
 function pickPrimaryColor(themeColor: string): string {
-  const fallback = '#6c63ff'
+  const fallback = '#01A390'
   let hex = (themeColor || '').trim()
   if (!/^#?[0-9a-f]{3,8}$/i.test(hex)) return fallback
   hex = hex.startsWith('#') ? hex : `#${hex}`

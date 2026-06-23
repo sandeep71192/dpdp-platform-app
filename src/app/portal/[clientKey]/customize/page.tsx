@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 
 interface PurposeGroup { id: string; label: string; description: string; necessary: boolean; enabled: boolean; dataPoints: string[]; trackers?: unknown[] }
-interface Config { primary_color: string; position: string; category: string; purpose_groups: PurposeGroup[]; translations: Record<string, Record<string, string>> }
+interface Config { primary_color: string; position: string; font: string; layout: string; heroImage: string; category: string; purpose_groups: PurposeGroup[]; translations: Record<string, Record<string, string>> }
 
 export default function CustomizePage() {
   const { clientKey } = useParams<{ clientKey: string }>()
@@ -18,8 +18,11 @@ export default function CustomizePage() {
     fetch(`/api/portal?key=${clientKey}`).then(r => r.json()).then(d => {
       if (d.client) setClient(d.client)
       if (d.config) setCfg({
-        primary_color: d.config.primary_color || '#6c63ff',
+        primary_color: d.config.primary_color || '#01A390',
         position: d.config.position || 'bottom-right',
+        font: d.config.font_family || 'inherit',
+        layout: d.config.layout || 'card',
+        heroImage: d.config.hero_image || '',
         category: d.config.category,
         purpose_groups: d.config.purpose_groups || [],
         translations: d.config.translations || {},
@@ -28,11 +31,11 @@ export default function CustomizePage() {
   }, [clientKey])
 
   // Live preview, rebuilt when an editable field changes.
-  const sig = cfg ? JSON.stringify([cfg.primary_color, cfg.position, cfg.purpose_groups.map(g => [g.id, g.enabled])]) : ''
+  const sig = cfg ? JSON.stringify([cfg.primary_color, cfg.position, cfg.font, cfg.layout, cfg.heroImage, cfg.purpose_groups.map(g => [g.id, g.enabled])]) : ''
   useEffect(() => {
     if (!cfg) return
     let cancelled = false
-    const draft = { name: client?.name || 'Your Store', colors: { primary: cfg.primary_color }, position: cfg.position, purposeGroups: cfg.purpose_groups, translations: cfg.translations }
+    const draft = { name: client?.name || 'Your Store', colors: { primary: cfg.primary_color }, position: cfg.position, font: cfg.font, layout: cfg.layout, heroImage: cfg.heroImage, purposeGroups: cfg.purpose_groups, translations: cfg.translations }
     fetch('/api/onboard/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(draft) })
       .then(r => r.text()).then(html => { if (!cancelled) setPreviewHtml(html) }).catch(() => {})
     return () => { cancelled = true }
@@ -51,7 +54,7 @@ export default function CustomizePage() {
     try {
       const res = await fetch('/api/portal/config', {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: clientKey, primary_color: cfg.primary_color, position: cfg.position, purposeGroups: cfg.purpose_groups }),
+        body: JSON.stringify({ key: clientKey, primary_color: cfg.primary_color, position: cfg.position, font: cfg.font, layout: cfg.layout, heroImage: cfg.heroImage, purposeGroups: cfg.purpose_groups }),
       })
       const d = await res.json()
       if (!res.ok) throw new Error(d.error || 'Could not save')
@@ -102,6 +105,29 @@ export default function CustomizePage() {
                   <option value="bottom-center">Bottom Center</option>
                 </select>
               </div>
+              <div>
+                <label className={labelCls}>Layout</label>
+                <select value={cfg.layout} onChange={e => set('layout', e.target.value)} className={inputCls}>
+                  <option value="card">Floating card</option>
+                  <option value="bar">Bottom bar</option>
+                  <option value="pill">Compact pill</option>
+                </select>
+              </div>
+              <div>
+                <label className={labelCls}>Font</label>
+                <select value={cfg.font} onChange={e => set('font', e.target.value)} className={inputCls}>
+                  <option value="inherit">Match my site</option>
+                  <option value="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">System sans</option>
+                  <option value="Inter,system-ui,sans-serif">Inter</option>
+                  <option value="Poppins,system-ui,sans-serif">Poppins</option>
+                  <option value="Georgia,Cambria,serif">Serif</option>
+                  <option value="ui-monospace,Menlo,monospace">Mono</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>Hero image URL <span className="text-zinc-400 normal-case">(optional — blank uses a brand-tinted illustration)</span></label>
+              <input value={cfg.heroImage} onChange={e => set('heroImage', e.target.value)} placeholder="https://…/hero.jpg" className={inputCls} />
             </div>
 
             <div>

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 // Scoped to the owning session (or super-admin). Bumps the config version.
 export async function PATCH(request: NextRequest) {
   const body = await request.json()
-  const { key, primary_color, position, purposeGroups } = body
+  const { key, primary_color, position, font, layout, heroImage, purposeGroups } = body
   if (!key) return NextResponse.json({ error: 'key required' }, { status: 400 })
 
   const { data: client } = await supabaseAdmin
@@ -39,12 +39,22 @@ export async function PATCH(request: NextRequest) {
   }
   if (typeof primary_color === 'string') update.primary_color = primary_color
   if (typeof position === 'string') update.position = position
+  if (typeof font === 'string') update.font_family = font
+  if (typeof layout === 'string') update.layout = layout
+  if (typeof heroImage === 'string') update.hero_image = heroImage || null
   if (Array.isArray(purposeGroups)) update.purpose_groups = purposeGroups
 
-  const { error } = await supabaseAdmin
+  let { error } = await supabaseAdmin
     .from('widget_configs')
     .update(update)
     .eq('id', current.id)
+
+  // Graceful fallback if the font/layout/hero migration hasn't been applied yet.
+  if (error && /font_family|layout|hero_image|column/i.test(error.message)) {
+    const { font_family, layout: _l, hero_image, ...base } = update
+    void font_family; void _l; void hero_image
+    ;({ error } = await supabaseAdmin.from('widget_configs').update(base).eq('id', current.id))
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true, version: update.version })

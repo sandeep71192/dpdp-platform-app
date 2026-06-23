@@ -48,8 +48,11 @@ export async function GET(request: NextRequest) {
   const js = generateWidgetJs({
     clientKey: client.client_key,
     brandName: client.name,
-    primaryColor: config.primary_color || '#6c63ff',
+    primaryColor: config.primary_color || '#01A390',
     position: config.position || 'bottom-right',
+    font: config.font_family || 'inherit',
+    layout: config.layout || 'card',
+    heroImage: config.hero_image || '',
     groups: (config.purpose_groups as never) || [],
     translations: (config.translations as never) || {},
     apiBase,

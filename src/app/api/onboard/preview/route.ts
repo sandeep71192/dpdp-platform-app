@@ -15,8 +15,11 @@ export async function POST(request: NextRequest) {
     const rawJs = generateWidgetJs({
       clientKey: 'preview',
       brandName: draft.name || 'Your Store',
-      primaryColor: draft?.colors?.primary || '#6c63ff',
+      primaryColor: draft?.colors?.primary || '#01A390',
       position: draft.position || 'bottom-right',
+      font: draft.font || 'inherit',
+      layout: draft.layout || 'card',
+      heroImage: draft.heroImage || '',
       groups: (draft.purposeGroups as never) || [],
       translations: (draft.translations as never) || {},
       apiBase: origin,

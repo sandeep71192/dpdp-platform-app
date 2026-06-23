@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       email, password, name, domain, owner_name, phone,
-      logo, tagline, colors, category, confidence, position, purposeGroups, translations,
+      logo, tagline, colors, category, confidence, position, font, layout, heroImage, purposeGroups, translations,
       childrenAcknowledged,
     } = body
 
@@ -68,15 +68,24 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Publish the reviewed widget config.
-    const { error: cfgErr } = await supabaseAdmin.from('widget_configs').insert({
+    const cfgRow: Record<string, unknown> = {
       client_id: client.id,
-      primary_color: colors?.primary || '#6c63ff',
+      primary_color: colors?.primary || '#01A390',
       secondary_color: colors?.secondary || '#ffffff',
       text_color: colors?.text || '#111111',
       category, confidence: confidence ?? 75, position: position || 'bottom-right',
+      font_family: font || 'inherit', layout: layout || 'card', hero_image: heroImage || null,
       purpose_groups: purposeGroups, translations,
       is_published: true, published_at: new Date().toISOString(), version: 1,
-    })
+    }
+    let { error: cfgErr } = await supabaseAdmin.from('widget_configs').insert(cfgRow)
+    // Graceful fallback if the font/layout/hero migration hasn't been applied yet:
+    // drop those columns and retry so onboarding never breaks on a schema lag.
+    if (cfgErr && /font_family|layout|hero_image|column/i.test(cfgErr.message)) {
+      const { font_family, layout: _l, hero_image, ...base } = cfgRow
+      void font_family; void _l; void hero_image
+      ;({ error: cfgErr } = await supabaseAdmin.from('widget_configs').insert(base))
+    }
     if (cfgErr) {
       await supabaseAdmin.from('clients').delete().eq('id', client.id)
       await rollback()

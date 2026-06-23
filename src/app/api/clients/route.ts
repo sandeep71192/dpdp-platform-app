@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       .from('widget_configs')
       .insert({
         client_id: client.id,
-        primary_color: colors?.primary || '#6c63ff',
+        primary_color: colors?.primary || '#01A390',
         secondary_color: colors?.secondary || '#ffffff',
         text_color: colors?.text || '#111111',
         category,
