@@ -81,7 +81,7 @@ export default function AddClientModal({ onClose, onCreated }: { onClose: () => 
   }
 
   const labelCls = 'block text-xs font-semibold text-zinc-500 mb-1.5 uppercase tracking-wider'
-  const inputCls = 'w-full bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl px-3 py-2.5 text-sm text-[#1b1b29] placeholder-zinc-600 outline-none focus:border-violet-500 transition-colors'
+  const inputCls = 'w-full bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl px-3 py-2.5 text-sm text-[#1b1b29] placeholder-zinc-600 outline-none focus:border-[#01A390] transition-colors'
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -109,7 +109,7 @@ export default function AddClientModal({ onClose, onCreated }: { onClose: () => 
               const done = (i === 0 && step !== 'form') || (i === 1 && (step === 'publishing'))
               return (
                 <div key={s} className="flex items-center gap-2">
-                  <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${done ? 'bg-green-500/20 text-green-400' : active ? 'bg-violet-600 text-white' : 'bg-black/[0.04] text-zinc-500'}`}>{done ? '✓' : i + 1}</span>
+                  <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${done ? 'bg-green-500/20 text-green-400' : active ? 'bg-[#01A390] text-white' : 'bg-black/[0.04] text-zinc-500'}`}>{done ? '✓' : i + 1}</span>
                   <span className={`text-xs ${active ? 'text-[#1b1b29]' : 'text-zinc-500'}`}>{s}</span>
                   {i < 2 && <span className="text-zinc-700 mx-1">—</span>}
                 </div>
@@ -148,7 +148,7 @@ export default function AddClientModal({ onClose, onCreated }: { onClose: () => 
           {/* STEP: ANALYZING / PUBLISHING */}
           {(step === 'analyzing' || step === 'publishing') && (
             <div className="py-16 text-center">
-              <div className="w-12 h-12 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin mx-auto mb-4"></div>
+              <div className="w-12 h-12 border-2 border-[#01A390]/30 border-t-[#01A390] rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-sm text-[#1b1b29] font-medium">{step === 'analyzing' ? `Analysing ${form.domain}…` : 'Publishing & generating widget…'}</p>
               <p className="text-xs text-zinc-500 mt-1">{step === 'analyzing' ? 'Classifying brand, extracting colours, drafting 11 languages' : 'Saving config and issuing the embed code'}</p>
             </div>
@@ -163,10 +163,10 @@ export default function AddClientModal({ onClose, onCreated }: { onClose: () => 
                   ? <img src={draft.logo} alt="" className="w-11 h-11 rounded-xl object-contain bg-black/[0.04]" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                   : <div className="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold text-white" style={{ background: draft.colors.primary }}>{draft.name.charAt(0)}</div>}
                 <div className="flex-1">
-                  <input value={draft.name} onChange={e => setD('name', e.target.value)} className="bg-transparent text-base font-bold text-[#1b1b29] outline-none border-b border-transparent focus:border-violet-500 w-full" />
+                  <input value={draft.name} onChange={e => setD('name', e.target.value)} className="bg-transparent text-base font-bold text-[#1b1b29] outline-none border-b border-transparent focus:border-[#01A390] w-full" />
                   <div className="text-xs text-zinc-500">{draft.domain}</div>
                 </div>
-                <span className="text-xs px-2.5 py-1 rounded-full bg-violet-500/10 text-violet-600 border border-violet-500/20">{draft.confidence}% confident</span>
+                <span className="text-xs px-2.5 py-1 rounded-full bg-[#01A390]/10 text-[#01A390] border border-[#01A390]/20">{draft.confidence}% confident</span>
               </div>
               <p className="text-xs text-zinc-500 -mt-2">{draft.description}</p>
 
@@ -244,15 +244,15 @@ export default function AddClientModal({ onClose, onCreated }: { onClose: () => 
               </div>
               <div className="bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl p-4 mb-4">
                 <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Embed Script Tag</div>
-                <code className="text-xs text-violet-300 break-all">{scriptTag}</code>
+                <code className="text-xs text-[#7fdccf] break-all">{scriptTag}</code>
               </div>
-              <div className="bg-violet-500/5 border border-violet-500/15 rounded-xl p-4 mb-4 text-xs text-zinc-500">
+              <div className="bg-[#01A390]/5 border border-[#01A390]/15 rounded-xl p-4 mb-4 text-xs text-zinc-500">
                 <div className="font-semibold text-[#1b1b29] mb-1">Client portal link</div>
-                <code className="text-violet-300 break-all">{appUrl}/portal/{clientKey}</code>
+                <code className="text-[#7fdccf] break-all">{appUrl}/portal/{clientKey}</code>
               </div>
               <div className="flex gap-3">
-                <button onClick={() => navigator.clipboard.writeText(scriptTag)} className="flex-1 py-2.5 rounded-xl border border-[#e8e8ee] text-sm text-zinc-700 hover:text-[#1b1b29] hover:border-violet-500 transition-colors">📋 Copy Script</button>
-                <button onClick={onClose} className="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors">Done</button>
+                <button onClick={() => navigator.clipboard.writeText(scriptTag)} className="flex-1 py-2.5 rounded-xl border border-[#e8e8ee] text-sm text-zinc-700 hover:text-[#1b1b29] hover:border-[#01A390] transition-colors">📋 Copy Script</button>
+                <button onClick={onClose} className="flex-1 py-2.5 rounded-xl bg-[#01A390] hover:bg-[#01A390] text-white text-sm font-semibold transition-colors">Done</button>
               </div>
             </div>
           )}
@@ -262,8 +262,8 @@ export default function AddClientModal({ onClose, onCreated }: { onClose: () => 
         {(step === 'form' || step === 'review') && (
           <div className="flex gap-3 px-6 py-4 border-t border-[#e8e8ee] flex-shrink-0">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#e8e8ee] text-sm text-zinc-500 hover:text-[#1b1b29] hover:border-zinc-500 transition-colors">Cancel</button>
-            {step === 'form' && <button type="submit" form="onboard-form" className="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors">Analyse →</button>}
-            {step === 'review' && <button type="button" onClick={publish} disabled={isChildren && !childrenAck} className="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors">Publish & Generate Widget →</button>}
+            {step === 'form' && <button type="submit" form="onboard-form" className="flex-1 py-2.5 rounded-xl bg-[#01A390] hover:bg-[#01A390] text-white text-sm font-semibold transition-colors">Analyse →</button>}
+            {step === 'review' && <button type="button" onClick={publish} disabled={isChildren && !childrenAck} className="flex-1 py-2.5 rounded-xl bg-[#01A390] hover:bg-[#01A390] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors">Publish & Generate Widget →</button>}
           </div>
         )}
       </div>

@@ -29,7 +29,7 @@ export default function StatCard({ icon, label, value, sub, loading, error, acti
       {error ? (
         <div className="text-xs text-red-400 mt-1.5">{error}</div>
       ) : sub ? (
-        <div className="text-xs text-violet-600 mt-1.5">{sub}</div>
+        <div className="text-xs text-[#01A390] mt-1.5">{sub}</div>
       ) : null}
     </div>
   )

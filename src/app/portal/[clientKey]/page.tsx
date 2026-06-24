@@ -109,7 +109,7 @@ export default function PortalOverview() {
                 <button
                   key={r}
                   onClick={() => handleRangeChange(r)}
-                  className={`text-xs px-2 py-1 rounded-lg font-medium transition-colors ${acceptanceRange === r ? 'bg-violet-600 text-white' : 'bg-black/[0.04] text-zinc-500 hover:text-[#1b1b29]'}`}
+                  className={`text-xs px-2 py-1 rounded-lg font-medium transition-colors ${acceptanceRange === r ? 'bg-[#01A390] text-white' : 'bg-black/[0.04] text-zinc-500 hover:text-[#1b1b29]'}`}
                 >
                   {RANGE_LABELS[r]}
                 </button>
@@ -162,12 +162,12 @@ export default function PortalOverview() {
                       <span className="text-zinc-500">{l.count} responses</span>
                     </div>
                     <div className="h-2 bg-[#e8e8ee] rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-violet-500 to-violet-400 rounded-full" style={{ width: `${(l.count / max) * 100}%` }}></div>
+                      <div className="h-full bg-gradient-to-r from-[#01A390] to-[#1bbfa9] rounded-full" style={{ width: `${(l.count / max) * 100}%` }}></div>
                     </div>
                   </div>
                 )
               })}
-              <Link href={`${base}/analytics`} className="inline-block text-xs text-violet-600 hover:text-violet-300 mt-2">View full analytics →</Link>
+              <Link href={`${base}/analytics`} className="inline-block text-xs text-[#01A390] hover:text-[#7fdccf] mt-2">View full analytics →</Link>
             </div>
           ) : (
             <p className="text-sm text-zinc-600 py-4">No consent responses yet. Data appears once customers interact with your widget.</p>
@@ -184,7 +184,7 @@ export default function PortalOverview() {
               { label: 'Compliance records', href: `${base}/compliance`, icon: '📋' },
             ].map(a => (
               <Link key={a.label} href={a.href}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-black/[0.04] hover:bg-violet-500/10 border border-transparent hover:border-violet-500/20 text-sm text-zinc-700 hover:text-[#1b1b29] transition-all">
+                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-black/[0.04] hover:bg-[#01A390]/10 border border-transparent hover:border-[#01A390]/20 text-sm text-zinc-700 hover:text-[#1b1b29] transition-all">
                 <span>{a.icon}</span>{a.label}
               </Link>
             ))}

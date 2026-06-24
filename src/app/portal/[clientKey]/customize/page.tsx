@@ -63,7 +63,7 @@ export default function CustomizePage() {
     finally { setSaving(false) }
   }
 
-  const inputCls = 'w-full bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl px-3 py-2.5 text-sm text-[#1b1b29] outline-none focus:border-violet-500'
+  const inputCls = 'w-full bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl px-3 py-2.5 text-sm text-[#1b1b29] outline-none focus:border-[#01A390]'
   const labelCls = 'block text-xs font-semibold text-zinc-500 mb-1.5 uppercase tracking-wider'
 
   return (
@@ -82,7 +82,7 @@ export default function CustomizePage() {
             <div className="rounded-2xl overflow-hidden border border-[#e8e8ee] bg-[#f0f0f8] relative" style={{ height: 520 }}>
               {previewHtml
                 ? <iframe srcDoc={previewHtml} title="Live widget preview" className="w-full h-full border-0" sandbox="allow-scripts allow-popups" />
-                : <div className="absolute inset-0 flex items-center justify-center"><div className="w-8 h-8 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" /></div>}
+                : <div className="absolute inset-0 flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#01A390]/30 border-t-[#01A390] rounded-full animate-spin" /></div>}
             </div>
             <p className="text-[11px] text-zinc-500 mt-2 text-center">Live preview — click Customise on the widget to see the full disclosure.</p>
           </div>
@@ -153,7 +153,7 @@ export default function CustomizePage() {
             {error && <div className="text-sm text-red-500">{error}</div>}
             <div className="flex items-center gap-3 pt-1">
               <button onClick={save} disabled={saving}
-                className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
+                className="px-5 py-3 rounded-xl bg-[#01A390] hover:bg-[#01A390] disabled:opacity-50 text-white text-sm font-semibold transition-colors">
                 {saving ? 'Publishing…' : 'Save & re-publish'}
               </button>
               {saved && <span className="text-sm text-green-600 font-medium">✓ Published — live within a few minutes</span>}

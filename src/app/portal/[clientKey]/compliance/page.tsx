@@ -16,7 +16,7 @@ const EVENT_BADGE: Record<string, string> = {
   shown: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
   accepted_all: 'bg-green-500/10 text-green-400 border-green-500/20',
   rejected_all: 'bg-red-500/10 text-red-400 border-red-500/20',
-  customised: 'bg-violet-500/10 text-violet-600 border-violet-500/20',
+  customised: 'bg-[#01A390]/10 text-[#01A390] border-[#01A390]/20',
   withdrawn: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
 }
 
@@ -41,13 +41,13 @@ export default function CompliancePage() {
           <p className="text-sm text-zinc-500 mt-1">Auditable consent log under DPDP Act 2023 · {count} records</p>
         </div>
         <a href={`/api/compliance?key=${clientKey}&format=csv`} download
-          className="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold rounded-xl transition-colors">
+          className="px-4 py-2.5 bg-[#01A390] hover:bg-[#01A390] text-white text-sm font-semibold rounded-xl transition-colors">
           ⬇️ Export CSV
         </a>
       </div>
 
       {/* DPDP compliance notice */}
-      <div className="bg-gradient-to-r from-violet-500/10 to-blue-500/10 border border-violet-500/20 rounded-2xl p-5 mb-6 flex items-start gap-4">
+      <div className="bg-gradient-to-r from-[#01A390]/10 to-blue-500/10 border border-[#01A390]/20 rounded-2xl p-5 mb-6 flex items-start gap-4">
         <div className="text-2xl">🇮🇳</div>
         <div className="text-xs text-zinc-700 leading-relaxed">
           <strong className="text-[#1b1b29]">DPDP Act 2023 audit trail.</strong> Every consent interaction is logged with a timestamp, the purposes consented to, language, and an anonymised session ID — <span className="text-zinc-500">no personally identifiable information is stored</span>. Export this log for Data Protection Board audits or grievance handling.
@@ -55,7 +55,7 @@ export default function CompliancePage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-32"><div className="w-10 h-10 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin"></div></div>
+        <div className="flex items-center justify-center py-32"><div className="w-10 h-10 border-2 border-[#01A390]/30 border-t-[#01A390] rounded-full animate-spin"></div></div>
       ) : records.length === 0 ? (
         <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-16 text-center">
           <div className="text-5xl mb-4">📋</div>

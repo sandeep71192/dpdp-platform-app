@@ -22,9 +22,9 @@ export default function PurposeCard({ data }: { data: PurposeAnalytics }) {
           <span className="text-sm font-semibold text-[#1b1b29]">{data.label}</span>
           <span className="text-xs text-zinc-400">{open ? '▲' : '▼'}</span>
         </div>
-        <div className="text-3xl font-bold text-violet-600 mb-1">{data.acceptRate}%</div>
+        <div className="text-3xl font-bold text-[#01A390] mb-1">{data.acceptRate}%</div>
         <div className="h-1.5 bg-[#e8e8ee] rounded-full overflow-hidden mb-1">
-          <div className="h-full bg-violet-500 rounded-full" style={{ width: `${data.acceptRate}%` }} />
+          <div className="h-full bg-[#01A390] rounded-full" style={{ width: `${data.acceptRate}%` }} />
         </div>
         <div className="text-xs text-zinc-500">{data.total.toLocaleString()} decisions</div>
       </button>
@@ -57,7 +57,7 @@ export default function PurposeCard({ data }: { data: PurposeAnalytics }) {
                     className="flex-1 h-full flex flex-col-reverse"
                     title={`${d.date}: ${d.accepted} accepted, ${d.rejected} rejected`}
                   >
-                    <div className="w-full bg-violet-500 rounded-t-[1px]" style={{ height: `${acceptedH}%` }} />
+                    <div className="w-full bg-[#01A390] rounded-t-[1px]" style={{ height: `${acceptedH}%` }} />
                     <div className="w-full bg-red-300" style={{ height: `${rejectedH}%` }} />
                   </div>
                 )

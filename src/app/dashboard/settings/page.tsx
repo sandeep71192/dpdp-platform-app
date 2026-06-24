@@ -19,7 +19,7 @@ export default function SettingsPage() {
               </div>
             ))}
           </div>
-          <div className="mt-4 text-xs text-zinc-600">Configure these in your <code className="text-violet-600">.env.local</code> file. Never commit secrets to git.</div>
+          <div className="mt-4 text-xs text-zinc-600">Configure these in your <code className="text-[#01A390]">.env.local</code> file. Never commit secrets to git.</div>
         </div>
 
         {/* Anthropic */}

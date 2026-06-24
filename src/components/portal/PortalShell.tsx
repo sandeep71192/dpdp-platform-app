@@ -63,7 +63,7 @@ export default function PortalShell({ clientKey, children }: { clientKey: string
             {client?.logo_url ? (
               <img src={client.logo_url} alt={client.name} className="w-9 h-9 rounded-lg object-contain bg-black/[0.04] flex-shrink-0" />
             ) : (
-              <div className="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center text-sm font-bold text-violet-600 flex-shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-[#01A390]/20 flex items-center justify-center text-sm font-bold text-[#01A390] flex-shrink-0">
                 {client?.name?.charAt(0) || '?'}
               </div>
             )}
@@ -80,7 +80,7 @@ export default function PortalShell({ clientKey, children }: { clientKey: string
             return (
               <Link key={href} href={href}
                 className={cn('flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
-                  active ? 'bg-violet-500/10 text-violet-600 border border-violet-500/20' : 'text-zinc-500 hover:text-[#1b1b29] hover:bg-black/[0.04]')}>
+                  active ? 'bg-[#01A390]/10 text-[#01A390] border border-[#01A390]/20' : 'text-zinc-500 hover:text-[#1b1b29] hover:bg-black/[0.04]')}>
                 <span className="text-base">{icon}</span>
                 {label}
               </Link>
@@ -89,9 +89,9 @@ export default function PortalShell({ clientKey, children }: { clientKey: string
         </nav>
 
         <div className="px-4 py-4 border-t border-[#e8e8ee]">
-          <div className="bg-violet-500/5 border border-violet-500/15 rounded-xl px-3 py-2.5">
+          <div className="bg-[#01A390]/5 border border-[#01A390]/15 rounded-xl px-3 py-2.5">
             <div className="text-[10px] text-zinc-500 uppercase tracking-wider mb-0.5">Plan</div>
-            <div className="text-sm font-semibold text-violet-600 capitalize">{client?.plan || '—'}</div>
+            <div className="text-sm font-semibold text-[#01A390] capitalize">{client?.plan || '—'}</div>
           </div>
           <div className="text-[10px] text-zinc-600 text-center mt-3">🔒 DPDP Act 2023 Compliant</div>
           <button

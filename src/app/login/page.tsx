@@ -32,7 +32,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-2xl mx-auto mb-4 shadow-lg shadow-violet-500/30">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#01A390] to-[#017d6e] flex items-center justify-center text-2xl mx-auto mb-4 shadow-lg shadow-[#01A390]/30">
             🛡️
           </div>
           <h1 className="text-xl font-bold text-[#1b1b29]">DPDP Platform</h1>
@@ -46,7 +46,7 @@ export default function LoginPage() {
               <label className="block text-xs font-semibold text-zinc-500 mb-1.5 uppercase tracking-wider">Email</label>
               <input
                 type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                className="w-full bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl px-4 py-3 text-sm text-[#1b1b29] placeholder-zinc-600 outline-none focus:border-violet-500 transition-colors"
+                className="w-full bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl px-4 py-3 text-sm text-[#1b1b29] placeholder-zinc-600 outline-none focus:border-[#01A390] transition-colors"
                 placeholder="you@brand.com"
               />
             </div>
@@ -54,7 +54,7 @@ export default function LoginPage() {
               <label className="block text-xs font-semibold text-zinc-500 mb-1.5 uppercase tracking-wider">Password</label>
               <input
                 type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                className="w-full bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl px-4 py-3 text-sm text-[#1b1b29] placeholder-zinc-600 outline-none focus:border-violet-500 transition-colors"
+                className="w-full bg-[#f3f3f5] border border-[#e8e8ee] rounded-xl px-4 py-3 text-sm text-[#1b1b29] placeholder-zinc-600 outline-none focus:border-[#01A390] transition-colors"
                 placeholder="••••••••"
               />
             </div>
@@ -67,7 +67,7 @@ export default function LoginPage() {
 
             <button
               type="submit" disabled={loading}
-              className="w-full bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600 disabled:opacity-60 text-white font-semibold py-3 rounded-xl text-sm transition-all shadow-lg shadow-violet-500/20"
+              className="w-full bg-gradient-to-r from-[#01A390] to-[#017d6e] hover:from-[#01A390] hover:to-[#01A390] disabled:opacity-60 text-white font-semibold py-3 rounded-xl text-sm transition-all shadow-lg shadow-[#01A390]/20"
             >
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
@@ -75,7 +75,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-sm text-zinc-500 mt-5">
-          New here? <Link href="/get-started" className="text-violet-600 hover:text-violet-300 font-medium">Generate your widget →</Link>
+          New here? <Link href="/get-started" className="text-[#01A390] hover:text-[#7fdccf] font-medium">Generate your widget →</Link>
         </p>
         <p className="text-center text-xs text-zinc-600 mt-4">
           DPDP Act 2023 Compliant · India

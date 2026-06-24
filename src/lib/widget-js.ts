@@ -304,7 +304,7 @@ export function generateWidgetJs(d: WidgetData): string {
 
   // Itemised cookie/tracker card (DPDP s.5 itemised notice; s.11 recipients).
   function trackerCard(tr){
-    var h='<div style="border:1px solid #eee;border-radius:10px;padding:9px 11px;margin-bottom:6px;background:#fff">';
+    var h='<div style="border:0.5px solid #ececef;border-radius:14px;padding:11px 13px;margin-bottom:8px;background:#fff">';
     h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;color:#111;word-break:break-all">'+tr.name+'</span><span style="flex:1"></span><span style="font-size:8px;font-weight:700;background:'+B.primary+'14;color:'+B.primary+';padding:2px 7px;border-radius:9px;flex-shrink:0">'+tr.provider+'</span></div>';
     h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px">';
     if(tr.platform){h+='<span style="font-size:8.5px;background:#f3f4f6;color:#555;padding:2px 7px;border-radius:6px">'+tr.platform+'</span>';}
@@ -334,13 +334,13 @@ export function generateWidgetJs(d: WidgetData): string {
     var groups=G;var ac=activeCat||(groups[0]&&groups[0].id)||'__dp';
     var mob=isMobile();
     var h='<div id="dpdp-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000000;align-items:'+(mob?'stretch':'center')+';justify-content:center;padding:'+(mob?'0':'16px')+';font-family:'+FONT+'">';
-    h+='<div style="background:#fff;'+(mob?'border-radius:0;width:100%;max-width:none;height:100%;max-height:100vh':'border-radius:18px;width:100%;max-width:680px;max-height:88vh')+';display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">';
+    h+='<div style="background:#fff;'+(mob?'border-radius:0;width:100%;max-width:none;height:100%;max-height:100vh':'border-radius:22px;width:100%;max-width:680px;max-height:88vh')+';display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.28)">';
     // Header
-    h+='<div style="padding:16px 18px 12px;border-bottom:1px solid #f0f0f0;flex-shrink:0">';
-    h+='<div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:10px;background:'+B.primary+'18;display:flex;align-items:center;justify-content:center;font-size:16px">🛡️</div>';
-    h+='<div style="flex:1"><div style="font-size:14px;font-weight:700;color:#111">'+t('title')+'</div><div style="font-size:10px;color:#777">'+B.name+' · DPDP Act 2023</div></div>';
-    h+='<button onclick="window._dpdpClose()" aria-label="Close" style="background:none;border:none;font-size:18px;color:#bbb;cursor:pointer;line-height:1">×</button></div>';
-    h+='<p style="font-size:10.5px;color:#555;line-height:1.5;margin:8px 0 0">'+t('body')+'</p></div>';
+    h+='<div style="padding:18px 20px 14px;border-bottom:0.5px solid #ececef;flex-shrink:0">';
+    h+='<div style="display:flex;align-items:center;gap:11px"><div style="width:34px;height:34px;border-radius:11px;background:'+B.primary+'15;display:flex;align-items:center;justify-content:center;font-size:16px">🛡️</div>';
+    h+='<div style="flex:1"><div style="font-size:15px;font-weight:600;color:#16161d;letter-spacing:-0.01em">'+t('title')+'</div><div style="font-size:10.5px;color:#9a9aa3">'+B.name+' · DPDP Act 2023</div></div>';
+    h+='<button onclick="window._dpdpClose()" aria-label="Close" style="width:30px;height:30px;border:none;background:#f4f4f6;border-radius:9px;font-size:16px;color:#999;cursor:pointer;line-height:1">×</button></div>';
+    h+='<p style="font-size:12px;color:#8a8a93;line-height:1.5;margin:10px 0 0">'+t('body')+'</p></div>';
     // Body: two-pane on desktop, stacked (tab strip on top) on mobile.
     h+='<div style="display:flex;'+(mob?'flex-direction:column':'')+';flex:1;min-height:0">';
     var dpsel=ac==='__dp';
@@ -374,11 +374,11 @@ export function generateWidgetJs(d: WidgetData): string {
       var g=null;for(var i=0;i<groups.length;i++){if(groups[i].id===ac)g=groups[i];}
       if(g){
         var on=g.necessary||toggles[g.id];
-        h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="flex:1"><div style="font-size:14px;font-weight:700;color:#111">'+g.label+'</div></div>';
-        if(g.necessary){h+='<span style="font-size:9px;font-weight:700;color:#16a34a;background:#dcfce7;padding:3px 9px;border-radius:9px">Always on</span>';}
-        else{h+='<div onclick="window._dpdpToggle(\\''+g.id+'\\')" style="width:40px;height:22px;border-radius:11px;background:'+(on?B.primary:'#ccc')+';position:relative;cursor:pointer;flex-shrink:0"><span style="position:absolute;top:2.5px;left:'+(on?'20px':'3px')+';width:17px;height:17px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span></div>';}
+        h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="flex:1"><div style="font-size:15px;font-weight:600;color:#16161d;letter-spacing:-0.01em">'+g.label+'</div></div>';
+        if(g.necessary){h+='<span style="font-size:10px;font-weight:600;color:#0f7d6e;background:'+B.primary+'14;padding:4px 11px;border-radius:10px">Always on</span>';}
+        else{h+='<div onclick="window._dpdpToggle(\\''+g.id+'\\')" style="width:46px;height:27px;border-radius:14px;background:'+(on?B.primary:'#e3e3e8')+';position:relative;cursor:pointer;flex-shrink:0"><span style="position:absolute;top:3px;left:'+(on?'22px':'3px')+';width:21px;height:21px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span></div>';}
         h+='</div>';
-        h+='<p style="font-size:11px;color:#555;line-height:1.6;margin:0 0 12px">'+g.description+'</p>';
+        h+='<p style="font-size:12.5px;color:#8a8a93;line-height:1.6;margin:0 0 14px">'+g.description+'</p>';
         var trk=g.trackers||[];
         if(trk.length){
           h+='<div style="font-size:9px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Cookies & trackers ('+trk.length+')</div>';
@@ -392,12 +392,12 @@ export function generateWidgetJs(d: WidgetData): string {
     }
     h+='</div></div>';
     // Footer actions
-    h+='<div style="padding:11px 14px;border-top:1px solid #f0f0f0;display:flex;gap:7px;flex-shrink:0">';
+    h+='<div style="padding:13px 16px;border-top:0.5px solid #ececef;display:flex;gap:8px;flex-shrink:0">';
     if(!allEss){
-      h+='<button onclick="window._dpdpSave(\\'necessary\\')" style="flex:1;padding:9px;border-radius:9px;font-size:10px;font-weight:700;border:1.5px solid #ddd;background:#fff;color:#555;cursor:pointer;font-family:inherit">'+t('onlyNecessary')+'</button>';
-      h+='<button onclick="window._dpdpSave(\\'selection\\')" style="flex:1;padding:9px;border-radius:9px;font-size:10px;font-weight:700;border:1.5px solid '+B.primary+';background:#fff;color:'+B.primary+';cursor:pointer;font-family:inherit">'+t('customise')+'</button>';
+      h+='<button onclick="window._dpdpSave(\\'necessary\\')" style="flex:1;min-height:44px;padding:11px;border-radius:14px;font-size:13px;font-weight:500;border:0.5px solid #e3e3e8;background:#fff;color:#5a5a63;cursor:pointer;font-family:inherit">'+t('onlyNecessary')+'</button>';
+      h+='<button onclick="window._dpdpSave(\\'selection\\')" style="flex:1;min-height:44px;padding:11px;border-radius:14px;font-size:13px;font-weight:500;border:0.5px solid '+B.primary+';background:#fff;color:'+B.primary+';cursor:pointer;font-family:inherit">'+t('customise')+'</button>';
     }
-    h+='<button onclick="window._dpdpSave(\\'all\\')" style="flex:1;padding:9px;border-radius:9px;font-size:10px;font-weight:700;border:none;background:'+B.primary+';color:#fff;cursor:pointer;font-family:inherit">'+t('allowAll')+'</button>';
+    h+='<button onclick="window._dpdpSave(\\'all\\')" style="flex:1;min-height:44px;padding:11px;border-radius:14px;font-size:14px;font-weight:600;border:none;background:'+B.primary+';color:#fff;cursor:pointer;font-family:inherit">'+t('allowAll')+'</button>';
     h+='</div>';
     // Grievance redressal + complaint route (DPDP s.5 notice / s.13 grievance, Rules 2025).
     // Always present so consumers can exercise rights and escalate to the Board.

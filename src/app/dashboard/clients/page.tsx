@@ -38,7 +38,7 @@ export default function ClientsPage() {
           <p className="text-sm text-zinc-500 mt-1">{clients.length} D2C brands connected</p>
         </div>
         <button onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-violet-500/20">
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#01A390] hover:bg-[#01A390] text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-[#01A390]/20">
           ➕ Add Client
         </button>
       </div>
@@ -48,7 +48,7 @@ export default function ClientsPage() {
         <input
           type="text" placeholder="Search clients by name or domain…" value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full max-w-sm bg-[#ffffff] border border-[#e8e8ee] rounded-xl px-4 py-2.5 text-sm text-[#1b1b29] placeholder-zinc-600 outline-none focus:border-violet-500 transition-colors"
+          className="w-full max-w-sm bg-[#ffffff] border border-[#e8e8ee] rounded-xl px-4 py-2.5 text-sm text-[#1b1b29] placeholder-zinc-600 outline-none focus:border-[#01A390] transition-colors"
         />
       </div>
 
@@ -59,7 +59,7 @@ export default function ClientsPage() {
           <h3 className="text-base font-semibold text-[#1b1b29] mb-2">No clients yet</h3>
           <p className="text-sm text-zinc-500 mb-6 max-w-xs mx-auto">Add your first D2C brand to start managing their DPDP consent widget.</p>
           <button onClick={() => setShowAdd(true)}
-            className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold rounded-xl transition-colors">
+            className="px-5 py-2.5 bg-[#01A390] hover:bg-[#01A390] text-white text-sm font-semibold rounded-xl transition-colors">
             Add First Client
           </button>
         </div>
@@ -78,7 +78,7 @@ export default function ClientsPage() {
                 <tr key={c.id} className="border-b border-[#e8e8ee] last:border-0 hover:bg-black/[0.02] transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center text-sm font-bold text-violet-600 flex-shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-[#01A390]/10 flex items-center justify-center text-sm font-bold text-[#01A390] flex-shrink-0">
                         {c.name.charAt(0)}
                       </div>
                       <div>
@@ -102,7 +102,7 @@ export default function ClientsPage() {
                   <td className="px-5 py-4 text-sm text-zinc-500">{formatDate(c.created_at)}</td>
                   <td className="px-5 py-4">
                     <a href={`/portal/${c.client_key}`} target="_blank"
-                      className="text-xs text-violet-600 hover:text-violet-300 font-medium transition-colors">
+                      className="text-xs text-[#01A390] hover:text-[#7fdccf] font-medium transition-colors">
                       Open Portal ↗
                     </a>
                   </td>

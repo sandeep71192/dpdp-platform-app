@@ -35,7 +35,7 @@ export default function IntegrationsPage() {
               <p className="text-xs text-zinc-500 leading-relaxed mb-3">{p.desc}</p>
               <button
                 disabled={p.status === 'coming_soon'}
-                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors">
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#01A390] hover:bg-[#01A390] disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors">
                 {p.status === 'coming_soon' ? 'Notify Me' : 'Setup Guide →'}
               </button>
             </div>

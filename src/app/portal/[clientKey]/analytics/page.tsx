@@ -52,13 +52,13 @@ export default function PortalAnalytics() {
         <div className="flex bg-[#ffffff] border border-[#e8e8ee] rounded-xl p-1">
           {[7, 30, 90].map(d => (
             <button key={d} onClick={() => setDays(d)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${days === d ? 'bg-violet-600 text-white' : 'text-zinc-500 hover:text-[#1b1b29]'}`}>{d}d</button>
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${days === d ? 'bg-[#01A390] text-white' : 'text-zinc-500 hover:text-[#1b1b29]'}`}>{d}d</button>
           ))}
         </div>
       </div>
 
       {loading || !clientId ? (
-        <div className="flex items-center justify-center py-32"><div className="w-10 h-10 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin"></div></div>
+        <div className="flex items-center justify-center py-32"><div className="w-10 h-10 border-2 border-[#01A390]/30 border-t-[#01A390] rounded-full animate-spin"></div></div>
       ) : !data || data.totalEvents === 0 ? (
         <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-16 text-center">
           <div className="text-5xl mb-4">📊</div>
@@ -89,7 +89,7 @@ export default function PortalAnalytics() {
               <div className="flex gap-4 text-xs">
                 <span className="flex items-center gap-1.5 text-zinc-500"><span className="w-2.5 h-2.5 rounded-sm bg-green-500"></span>Accepted</span>
                 <span className="flex items-center gap-1.5 text-zinc-500"><span className="w-2.5 h-2.5 rounded-sm bg-red-500"></span>Rejected</span>
-                <span className="flex items-center gap-1.5 text-zinc-500"><span className="w-2.5 h-2.5 rounded-sm bg-violet-500"></span>Customised</span>
+                <span className="flex items-center gap-1.5 text-zinc-500"><span className="w-2.5 h-2.5 rounded-sm bg-[#01A390]"></span>Customised</span>
               </div>
             </div>
             <div className="flex items-end gap-1 h-40">
@@ -103,7 +103,7 @@ export default function PortalAnalytics() {
                         <>
                           <div className="bg-green-500" style={{ height: `${(d.accepted / total) * 100}%` }}></div>
                           <div className="bg-red-500" style={{ height: `${(d.rejected / total) * 100}%` }}></div>
-                          <div className="bg-violet-500" style={{ height: `${(d.customised / total) * 100}%` }}></div>
+                          <div className="bg-[#01A390]" style={{ height: `${(d.customised / total) * 100}%` }}></div>
                           <div className="bg-zinc-300 flex-1"></div>
                         </>
                       ) : <div className="bg-zinc-200 h-full"></div>}
@@ -127,7 +127,7 @@ export default function PortalAnalytics() {
                   return (
                     <div key={l.code}>
                       <div className="flex justify-between text-xs mb-1"><span className="text-zinc-700">{l.name}</span><span className="text-zinc-500">{l.count}</span></div>
-                      <div className="h-1.5 bg-[#e8e8ee] rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-violet-500 to-violet-400 rounded-full" style={{ width: `${(l.count / max) * 100}%` }}></div></div>
+                      <div className="h-1.5 bg-[#e8e8ee] rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-[#01A390] to-[#1bbfa9] rounded-full" style={{ width: `${(l.count / max) * 100}%` }}></div></div>
                     </div>
                   )
                 })}

@@ -28,7 +28,7 @@ export default function LanguageAnalyticsTable({ data }: { data: LanguageAnalyti
               <span className="text-zinc-500">{l.consents.toLocaleString()} consents · {l.percentage}%</span>
             </div>
             <div className="h-2 bg-[#e8e8ee] rounded-full overflow-hidden mb-1.5">
-              <div className="h-full bg-gradient-to-r from-violet-500 to-violet-400 rounded-full" style={{ width: `${l.percentage}%` }} />
+              <div className="h-full bg-gradient-to-r from-[#01A390] to-[#1bbfa9] rounded-full" style={{ width: `${l.percentage}%` }} />
             </div>
             <div className="flex gap-4 text-xs">
               <span className="text-green-600">Accept {l.acceptRate}%</span>

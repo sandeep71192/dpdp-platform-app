@@ -22,7 +22,7 @@ export default function RangeFilter({ range, from, to, onChange }: RangeFilterPr
         <button
           key={key}
           onClick={() => onChange(key)}
-          className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${range === key ? 'bg-violet-600 text-white' : 'bg-black/[0.04] text-zinc-500 hover:text-[#1b1b29]'}`}
+          className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${range === key ? 'bg-[#01A390] text-white' : 'bg-black/[0.04] text-zinc-500 hover:text-[#1b1b29]'}`}
         >
           {RANGE_LABELS[key]}
         </button>

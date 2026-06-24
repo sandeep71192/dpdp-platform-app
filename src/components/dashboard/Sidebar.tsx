@@ -19,7 +19,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="px-5 py-5 border-b border-[#e8e8ee]">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-sm shadow-lg shadow-violet-500/30">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#01A390] to-[#017d6e] flex items-center justify-center text-sm shadow-lg shadow-[#01A390]/30">
             🛡️
           </div>
           <div>
@@ -38,7 +38,7 @@ export default function Sidebar() {
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
                 active
-                  ? 'bg-violet-500/10 text-violet-600 border border-violet-500/20'
+                  ? 'bg-[#01A390]/10 text-[#01A390] border border-[#01A390]/20'
                   : 'text-zinc-500 hover:text-[#1b1b29] hover:bg-black/[0.04]'
               )}>
               <span className="text-base">{icon}</span>
@@ -51,7 +51,7 @@ export default function Sidebar() {
       {/* Bottom */}
       <div className="px-4 py-4 border-t border-[#e8e8ee]">
         <div className="flex items-center gap-2 px-2 py-2">
-          <div className="w-7 h-7 rounded-full bg-violet-500/20 flex items-center justify-center text-xs text-violet-600 font-bold">A</div>
+          <div className="w-7 h-7 rounded-full bg-[#01A390]/20 flex items-center justify-center text-xs text-[#01A390] font-bold">A</div>
           <div>
             <div className="text-xs font-semibold text-[#1b1b29]">Admin</div>
             <div className="text-[10px] text-zinc-500">Super Admin</div>

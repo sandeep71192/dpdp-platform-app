@@ -87,11 +87,11 @@ export default function WidgetPage() {
           {/* Script tag */}
           <div className="bg-[#ffffff] border border-[#e8e8ee] rounded-2xl p-6">
             <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">Your Embed Code</h2>
-            <div className="bg-[#f4f4f7] border border-[#e8e8ee] rounded-xl p-4 font-mono text-xs text-violet-300 break-all mb-3">
+            <div className="bg-[#f4f4f7] border border-[#e8e8ee] rounded-xl p-4 font-mono text-xs text-[#7fdccf] break-all mb-3">
               {scriptTag}
             </div>
             <button onClick={copy}
-              className="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors">
+              className="w-full py-2.5 rounded-xl bg-[#01A390] hover:bg-[#01A390] text-white text-sm font-semibold transition-colors">
               {copied ? '✓ Copied!' : '📋 Copy Embed Code'}
             </button>
           </div>
@@ -109,7 +109,7 @@ export default function WidgetPage() {
                 className="flex-1 text-sm border border-[#e8e8ee] rounded-xl px-3 py-2 bg-white text-[#1b1b29] placeholder:text-zinc-400 font-mono"
               />
               <button onClick={saveDomain} disabled={domainSaving}
-                className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap">
+                className="px-4 py-2 rounded-xl bg-[#01A390] hover:bg-[#01A390] text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap">
                 {domainSaving ? 'Saving…' : domainSaved ? '✓ Saved' : 'Save'}
               </button>
             </div>
@@ -123,7 +123,7 @@ export default function WidgetPage() {
             <div className="flex gap-2 mb-5 flex-wrap">
               {PLATFORMS.map(p => (
                 <button key={p.id} onClick={() => setActivePlatform(p.id)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${activePlatform === p.id ? 'bg-violet-600 text-white' : 'bg-black/[0.04] text-zinc-500 hover:text-[#1b1b29]'}`}>
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${activePlatform === p.id ? 'bg-[#01A390] text-white' : 'bg-black/[0.04] text-zinc-500 hover:text-[#1b1b29]'}`}>
                   <span>{p.icon}</span>{p.name}
                 </button>
               ))}
@@ -131,7 +131,7 @@ export default function WidgetPage() {
             <ol className="space-y-3">
               {platform.steps.map((step, i) => (
                 <li key={i} className="flex gap-3 text-sm text-zinc-700">
-                  <span className="w-5 h-5 rounded-full bg-violet-500/20 text-violet-600 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                  <span className="w-5 h-5 rounded-full bg-[#01A390]/20 text-[#01A390] text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
                   {step}
                 </li>
               ))}
